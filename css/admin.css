@@ -1,0 +1,102 @@
+	::selection { background-color: #E13300; color: white; }
+	::-moz-selection { background-color: #E13300; color: white; }
+
+	body {
+		background-color: #fff;
+		margin: 40px;
+		font: 13px/20px normal Helvetica, Arial, sans-serif;
+		color: #4F5155;
+	}
+
+	a {
+		color: #003399;
+		background-color: transparent;
+		font-weight: normal;
+	}
+
+	h1 {
+		color: #444;
+		background-color: transparent;
+		font-size: 20px;
+		font-weight: normal;
+		margin: 0 0 14px 0;
+		padding: 14px 15px 10px 15px;
+	}
+
+	code {
+		font-family: Consolas, Monaco, Courier New, Courier, monospace;
+		font-size: 12px;
+		background-color: #f9f9f9;
+		border: 1px solid #D0D0D0;
+		color: #002166;
+		display: block;
+		margin: 14px 0 14px 0;
+		padding: 12px 10px 12px 10px;
+	}
+
+	#body {
+		margin: 0 15px 0 15px;
+	}
+
+	p.footer {
+		text-align: right;
+		font-size: 11px;
+		border-top: 1px solid #D0D0D0;
+		line-height: 32px;
+		padding: 0 10px 0 10px;
+		margin: 20px 0 0 0;
+	}
+
+	#container {
+		margin: 10px;
+		border: 1px solid #D0D0D0;
+		box-shadow: 0 0 8px #D0D0D0;
+	}
+	
+	#nav_header{
+		margin: 0 0 10px 0;
+		background-color: transparent;
+		border-bottom: 1px solid #D0D0D0;
+	}
+	
+	.fl_left{
+		float: left;
+	}
+	
+	.fl_right{
+		float: right;
+	}
+	
+	.clear {
+		clear: both;
+	}
+	
+/* Navigation
+--------------------------------------------------------------------------------------------------------------- */
+nav ul, nav ol{margin:0; padding:0; list-style:none;}
+
+#mainav, #breadcrumb, .sidebar nav{line-height:normal;}
+#mainav .drop::after, #mainav li li .drop::after, #breadcrumb li a::after, .sidebar nav a::after{position:absolute; font-family:"FontAwesome"; font-size:10px; line-height:10px;}
+
+/* Top Navigation */
+#mainav{padding:10px;}
+#mainav ul{}
+#mainav ul ul{z-index:9999; position:absolute; width:180px; text-transform:none;}
+#mainav ul ul ul{left:180px; top:0;}
+#mainav li{display:inline-block; position:relative; margin:0 10px 0 0; padding:0;}
+#mainav li:last-child{margin-right:0;}
+#mainav li li{width:100%; margin:0;}
+#mainav li a{display:block; padding:10px 0; border-top:5px solid transparent; text-decoration: none;}
+#mainav li li a{border:solid; border-width:0 0 1px 0;}
+#mainav .drop{padding-left:15px;}
+#mainav li li a, #mainav li li .drop{display:block; margin:0; padding:10px 15px; text-decoration: none;}
+#mainav .drop::after, #mainav li li .drop::after{content:"\f0d7";}
+#mainav .drop::after{top:20px; left:5px;}
+#mainav li li .drop::after{top:15px; left:5px;}
+#mainav ul ul{visibility:hidden; opacity:0;}
+#mainav ul li:hover > ul{visibility:visible; opacity:1;}
+
+#mainav form{display:none; margin:0; padding:0;}
+#mainav form select, #mainav form select option{display:block; cursor:pointer; outline:none;}
+#mainav form select{width:100%; padding:5px; border:1px solid;}
+#mainav form select option{margin:5px; padding:0; border:none;}

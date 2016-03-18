@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require(APPPATH.'/validations/Users_creation_validation.php');
 require(APPPATH.'/validations/Users_update_validation.php');
 require(APPPATH.'/objects/user.php');
+use \YaLinqo\Enumerable;
 
 class Users_model extends CI_Model {
 		
@@ -24,46 +25,54 @@ class Users_model extends CI_Model {
 			if ($this->form_validation->error_array())
 			{
 				$result['error'] = $this->form_validation->error_array();
+				return $result;
 				//TODO: throw validation exception
 			}
 			
 			$user = $this->insert_user($post_data);
+			if(array_key_exists('error', $user)){
+				$result['error'] = $user['error'];
+				return $result;
+			}
+			//insert cred
+			$this->upsert_userCredential($post_data, $user->userId);
 		}
 		
 		public function upsert_userCredential($post_data, $userId)
 		{
 			$this->db->select('id');
-			$credentialTypeResult = $this->db->get_where('ccredentialtypes', array('name' => $post_data['credentialType']))->row_array();
-			$credentialTypeId = $credentialTypeResult['id'];
-			$userCredentialsQueryResult = $this->db->get_where('usercredentials', array('userId' => $userId, 'credentialTypeId' => $credentialTypeId))->row_array();
 			
+			$credentialTypeResult = $this->db->get_where('credentialtypes',
+			 array('name' => $post_data['credentialType']))->row_array();
+			 
+			$credentialTypeId = $credentialTypeResult['id'];
+			
+			$userCredentialsQueryResult = $this->db->get_where('usercredentials',
+			 array('userId' => $userId, 'credentialTypeId' => $credentialTypeId))->row_array();
+						
 			if (empty($userCredentialsQueryResult))
 			{
+				$nowDate = mdate(DATE_TIME_STRING, time());
 				$data = array(
 				'userId' => $userId,
 		        'credentialTypeId' => $credentialTypeId,
 		        'createdDate' => $nowDate
-		    );
+		    	);
+				
 				if (STANDARD_CREDENTIALTYPE == $post_data['credentialType'])
 				{
-					
+					$data['password'] = $post_data['password'];
 				}
-				
+				else
+				{
+					$data['socialId'] = $post_data['socialId'];
+				}
 			
-			if ($post_data['isSearchable'])
-			{
-				$data['isSearchable'] = $post_data['isSearchable'];
-			}
-		
-		    $this->db->insert('users', $data);
-			}
-			else
-			{
-				
+			    $this->db->insert('usercredentials', $data);
 			}
 		}
 		
-		public function insert_user($post_data)
+		private function insert_user($post_data)
 		{
 			//ensure that the email address is not in use
 			$emailInUse = $this->userEmailInUse($post_data['email']);
@@ -72,51 +81,45 @@ class Users_model extends CI_Model {
 			{				
 				//TODO: error message should say the specific credential type to log in with.
 				$result['error'] = "It appears you already have an account with us. Please log with your username/password or your facebook or google account";
+				return $result;
 				//TODO: throw validation exception
 			}			
 
-			//ensure that the username is not in use
+			//ensure that the username/socialId is not in use
 			if ($post_data['credentialType'] == STANDARD_CREDENTIALTYPE && $this->userNameInUse($post_data['username'])){
 				$result['error'] = "This username is not available";
+				return $result;
 				//TODO: throw validation exception
 			}
 			
-			//ensure the roleId is valid
-			$userRoleQueryResult = $this->db->get('userroles', array('id' => $post_data['userRoleId']))->row_array();
-			if (empty($userRoleQueryResult))
-			{
-				//TODO: throw exception
-			}
-			
-			$userRole = $userRoleQueryResult['name'];			
-			
-			$datestring = '%Y/%m/%d %H:%i:%s';
-			$time = time();
-		
-			$nowDate = mdate($datestring, $time);
+			$nowDate = mdate(DATE_TIME_STRING, time());
 			
 			$data = array(
 				'email' => $post_data['email'],
-		        'userRoleId' => $post_data['userRoleId'],
+		        'username' => $post_data['username'],
 		        'createdDate' => $nowDate
 		    );
 			
-			if ($post_data['isSearchable'])
+			if (array_key_exists('firstName', $post_data))
 			{
-				$data['isSearchable'] = $post_data['isSearchable'];
+				$data['firstName'] = $post_data['firstName'];
+			}
+			
+			if (array_key_exists('lastName', $post_data))
+			{
+				$data['lastName'] = $post_data['lastName'];
 			}
 		
 		    $this->db->insert('users', $data);
-			//retrieve the just created userId
-			$this->db->select('id', 'email', 'userRoleId', 'active', 'isSearchable');
+			//retrieve the just created user
 			$userQueryResult = $this->db->get_where('users', array('email' => $post_data['email']))->row_array();
 			
 			$user = new User();
 			$user->userId = $userQueryResult['id'];
 			$user->email = $userQueryResult['email'];
 			$user->isActive = $userQueryResult['isActive'];
-			$user->isSearchable = $userQueryResult['isSearchable'];
-			$user->userRole = $userRole;
+			$user->firstName = $userQueryResult['firstName'];
+			$user->lastName = $userQueryResult['lastName'];;
 			
 			return $user;		
 		}
@@ -134,7 +137,7 @@ class Users_model extends CI_Model {
 		
 		private function userNameInUse($username)
 		{
-			$query = $this->db->get_where('userCredentials', array('username' => $username));
+			$query = $this->db->get_where('users', array('username' => $username));
 			$row = $query->row_array();
 			if ($row && count($row) > 0){
 				return true;

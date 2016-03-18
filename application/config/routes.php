@@ -62,8 +62,8 @@ $route['translate_uri_dashes'] = FALSE;
 //api routes
 $route['api/admin/(:any)/(:num)'] = 'api/admin/$1/id/$2'; 
 $route['api/admin/(:any)'] = 'api/admin/$1';
-$route['api/(:any)/(:num)'] = 'api/site/$1/id/$2'; 
-$route['api/(:any)'] = 'api/site/$1';
+$route['api/(:any)/(:num)'] = 'api/$1/$1/id/$2'; 
+$route['api/(:any)'] = 'api/$1/$1';
 
 
 /*

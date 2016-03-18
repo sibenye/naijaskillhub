@@ -95,6 +95,7 @@ defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest auto
  define('STANDARD_CREDENTIALTYPE', 'STANDARD');
  define('FACEBOOK_CREDENTIALTYPE', 'FACEBOOK');
  define('GOOGLE_CREDENTIALTYPE', 'GOOGLE');
+ define('DATE_TIME_STRING', '%Y/%m/%d %H:%i:%s');
  
 //Url Constants
 define('ADMIN_URL_PREFIX', 'admin'); 

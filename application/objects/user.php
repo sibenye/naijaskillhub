@@ -6,7 +6,7 @@ class user {
     public $userId = NULL;
 	public $email = '';
 	public $isActive = FALSE;
-	public $isSearchable = TRUE;
-	public $credentialTypes = array();   
-    public $userRole = '';
+	public $firstName = '';
+	public $lastName = '';
+	public $credentialTypes = array();
 }

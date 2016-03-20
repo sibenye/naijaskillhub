@@ -10,14 +10,22 @@ class CredentialTypes_model extends CI_Model {
 		
 		public function get_credentialTypes($id = FALSE)
 		{
-		        if ($id === FALSE)
-		        {
-		                $query = $this->db->get('credentialTypes');
-		                return $query->result_array();
-		        }
-		
-		        $query = $this->db->get_where('credentialTypes', array('id' => $id));
-		        return $query->row_array();
+			$result = NULL;
+	        if ($id === FALSE)
+	        {
+                $query = $this->db->get('credentialTypes');
+                $result = $query->result_array();
+	        } else {
+	        	$query = $this->db->get_where('credentialTypes', array('id' => $id));			
+	        	$result = $query->row_array();
+	        }
+	
+	        if (!$result){
+				$message = 'No CredentialTypes found';
+				show_resourceNotFound_exception($message);
+			}
+			
+			return $result;
 		}
 		
 		public function save_credentialType($post_data)

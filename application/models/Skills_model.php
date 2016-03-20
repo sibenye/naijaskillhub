@@ -12,20 +12,27 @@ class Skills_model extends CI_Model {
 		
 		public function get_skills($id = NULL, $categoryId = NULL)
 		{
-		        if (!$id && !$categoryId)
-		        {
-	                $query = $this->db->get('skills');
-					return $query->result_array();
-		        }elseif ($id && $categoryId){
-		        	$query = $this->db->get_where('skills', array('id' => $id, 'categoryId' => $categoryId));
-					return $query->row_array();
-		        }elseif ($categoryId){
-		        	$query = $this->db->get_where('skills', array('categoryId' => $categoryId));
-					return $query->result_array();
-		        }else{
-		        	$query = $this->db->get_where('skills', array('id' => $id));
-					return $query->row_array();
-		        }		        
+			$result = NULL;
+	        if (!$id && !$categoryId)
+	        {
+                $query = $this->db->get('skills');
+				$result = $query->result_array();
+	        }elseif ($id && $categoryId){
+	        	$query = $this->db->get_where('skills', array('id' => $id, 'categoryId' => $categoryId));
+				$result = $query->row_array();
+	        }elseif ($categoryId){
+	        	$query = $this->db->get_where('skills', array('categoryId' => $categoryId));
+				$result = $query->result_array();
+	        }else{
+	        	$query = $this->db->get_where('skills', array('id' => $id));					
+				$result = $query->row_array();
+	        }
+			
+			if (!$result){
+				$message = 'No skills found';
+				show_resourceNotFound_exception($message);
+			}	
+			return $result;        
 		}
 		
 		public function save_skill($post_data)
@@ -37,15 +44,14 @@ class Skills_model extends CI_Model {
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array()){
-				$result['error'] = $this->form_validation->error_array();
-				return $result;
+				show_validation_exception($this->form_validation->error_array());
 			}
 
 			//ensure that the category Id exists
 			$existingCategory = $this->db->get_where('skillCategories', array('id' => $post_data['categoryId']))->row_array();
 			if(!$existingCategory || empty($existingCategory)){
-				$result['error'] = "Category Id does not exist";
-				return $result;
+				$error_message = "Category Id does not exist";
+				show_validation_exception($error_message);
 			}
 			
 			//ensure that the name does not belong to another
@@ -57,9 +63,8 @@ class Skills_model extends CI_Model {
 	        {
 	        	if ($existingSkill && $existingSkill['id'] !== $post_data['id']){
 					//throw or return error
-					$error = 'The name \''.$name.'\' is already in use';
-					$result['error'] = $error;
-					return $result;
+					$error_message = 'The name \''.$name.'\' is already in use';
+					show_validation_exception($error_message);
 				}
 				
 	        	$id = $post_data['id'];
@@ -73,10 +78,8 @@ class Skills_model extends CI_Model {
 			
 			if ($existingSkill)
 			{
-					//throw or return error
-					$error = 'The name \''.$name.'\' is already in use';
-					$result['error'] = $error;
-					return $result;
+				$error_message = 'The name \''.$name.'\' is already in use';
+				show_validation_exception($error_message);
 			}
 			
 			$this->load->helper('date');
@@ -98,7 +101,12 @@ class Skills_model extends CI_Model {
 		
 		public function delete_skill($id)
 		{
-			return $this->db->delete('skills', array('id' => $id));
+			$result = $this->db->delete('skills', array('id' => $id));
+			
+			if($result === FALSE)
+	        {
+	            show_nsh_exception('failed to delete skill');
+	        }
 		}
 		
 		

@@ -23,18 +23,12 @@ class Users_model extends CI_Model {
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array())
-			{
-				$result['error'] = $this->form_validation->error_array();
-				return $result;
-				//TODO: throw validation exception
+			{				
+				show_validation_exception($this->form_validation->error_array());
 			}
 			
 			$user = $this->insert_user($post_data);
-			if(array_key_exists('error', $user)){
-				$result['error'] = $user['error'];
-				return $result;
-			}
-			//insert cred
+			//insert credential
 			$this->upsert_userCredential($post_data, $user->userId);
 		}
 		
@@ -78,18 +72,15 @@ class Users_model extends CI_Model {
 			$emailInUse = $this->userEmailInUse($post_data['email']);
 			
 			if ($emailInUse)
-			{				
-				//TODO: error message should say the specific credential type to log in with.
-				$result['error'] = "It appears you already have an account with us. Please log with your username/password or your facebook or google account";
-				return $result;
-				//TODO: throw validation exception
+			{
+				$error_message = "It appears you already have an account with us. Please log with your username/password or your facebook or google account";
+				show_validation_exception($error_message);
 			}			
 
 			//ensure that the username/socialId is not in use
 			if ($post_data['credentialType'] == STANDARD_CREDENTIALTYPE && $this->userNameInUse($post_data['username'])){
-				$result['error'] = "This username is not available";
-				return $result;
-				//TODO: throw validation exception
+				$error_message = "This username is not available";
+				show_validation_exception($error_message);
 			}
 			
 			$nowDate = mdate(DATE_TIME_STRING, time());

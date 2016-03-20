@@ -10,20 +10,23 @@ class UserAttributeValues_model extends CI_Model {
 		
 		public function get_userAttributeValues($userId = NULL, $attributeId = NULL)
 		{
+			$result = NULL;
 			if (!empty($userId) && empty($attributeId)){
 				$query = $this->db->get_where('userAttributeValues', array('userId' => $userId));
-	        	return $query->result_array();
-			}
-			
-			if (empty($userId) && !empty($attributeId)){
+	        	$result = $query->result_array();
+			}elseif (empty($userId) && !empty($attributeId)){
 				$query = $this->db->get_where('userAttributeValues', array('attributeId' => $attributeId));
-	        	return $query->result_array();
+	        	$result = $query->result_array();
+			}elseif (!empty($userId) && !empty($attributeId)){
+				$query = $this->db->get_where('userAttributeValues', array('userId' => $userId, 'attributeId' => $attributeId));
+	        	$result = $query->row_array();
 			}
 			
-			if (!empty($userId) && !empty($attributeId)){
-				$query = $this->db->get_where('userAttributeValues', array('userId' => $userId, 'attributeId' => $attributeId));
-	        	return $query->row_array();
+			if (!$result){
+				$message = 'No userAttributeValues found';
+				show_resourceNotFound_exception($message);
 			}
+			return $result;
 		        
 		}
 		
@@ -49,7 +52,13 @@ class UserAttributeValues_model extends CI_Model {
 		
 		public function delete_userAttributeValue($attributeId, $userId)
 		{		
-		    return $this->db->delete('userAttributeValues', array('attributeId' => $attributeId, 'userId' => $userId));
+		    $result = $this->db->delete('userAttributeValues', array('attributeId' => $attributeId, 'userId' => $userId));
+			
+			if($result === FALSE)
+	        {
+	        	$message = 'failed to delete userAttributeValue';
+				show_nsh_exception($message);
+	        }
 		}		
 }
 	

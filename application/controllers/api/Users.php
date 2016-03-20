@@ -17,19 +17,12 @@ class Users extends REST_Controller {
     }
 	
 	function users_post(){
+	
 		$post_data = $this->post();
-				
-        $result = $this->Users_model->create_user($post_data);
-         
-        if($result['error'])
-        {
-            $this->response(array('status' => 'failed', 'message' => $result['error']));
-        }
-         
-        else
-        {
-            $this->response(array('status' => 'success'));
-        }
+			
+    	$this->Users_model->create_user($post_data);
+     
+    	$this->response(array('status' => 'success'));		
 	}
 }
 	

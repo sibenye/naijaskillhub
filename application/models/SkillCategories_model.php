@@ -12,14 +12,23 @@ class SkillCategories_model extends CI_Model {
 		
 		public function get_skillCategories($id = FALSE)
 		{
-		        if ($id === FALSE)
-		        {
-		                $query = $this->db->get('skillCategories');
-		                return $query->result_array();
-		        }
-		
-		        $query = $this->db->get_where('skillCategories', array('id' => $id));
-		        return $query->row_array();
+			$result = NULL;
+			
+	        if ($id === FALSE)
+	        {
+                $query = $this->db->get('skillCategories');
+                $result = $query->result_array();
+	        } else {
+	        	$query = $this->db->get_where('skillCategories', array('id' => $id));			
+	        	$result = $query->row_array();
+	        }
+	
+	        if (!$result){
+				$message = 'No skillCategories found';
+				show_resourceNotFound_exception($message);
+			}
+			
+			return $result;
 		}
 		
 		public function save_skillCategory($post_data)
@@ -31,8 +40,7 @@ class SkillCategories_model extends CI_Model {
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array()){
-				$result['error'] = $this->form_validation->error_array();
-				return $result;
+				show_validation_exception($this->form_validation->error_array());
 			}
 			
 			//ensure that the name does not belong to another
@@ -43,10 +51,8 @@ class SkillCategories_model extends CI_Model {
 			if (!empty($post_data['id']))
 	        {
 	        	if ($existingCategory && $existingCategory['id'] !== $post_data['id']){
-					//throw or return error
-					$error = 'The name \''.$name.'\' is already in use';
-					$result['error'] = $error;
-					return $result;
+					$error_message = 'The name \''.$name.'\' is already in use';
+					show_validation_exception($error_message);
 				}
 				
 	        	$id = $post_data['id'];
@@ -56,10 +62,8 @@ class SkillCategories_model extends CI_Model {
 			
 			if ($existingCategory)
 			{
-					//throw or return error
-					$error = 'The name \''.$name.'\' is already in use';
-					$result['error'] = $error;
-					return $result;
+				$error_message = 'The name \''.$name.'\' is already in use';
+				show_validation_exception($error_message);
 			}
 		
 		    $data = array(
@@ -73,8 +77,11 @@ class SkillCategories_model extends CI_Model {
 		{
 			//all the skills in this category will also be deleted			
 			$this->db->delete('skills', array('categoryId' => $id));
-			return $this->db->delete('skillCategories', array('id' => $id));
-		}
-		
-		
+			$result = $this->db->delete('skillCategories', array('id' => $id));
+			
+			if($result === FALSE)
+	        {
+	        	show_nsh_exception('failed to delete skillCategory');
+	        }
+		}		
 }

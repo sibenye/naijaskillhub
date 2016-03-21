@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	 */
  	public function show_validation_exception($message)
 	{
-		$this->output_error($message, 400);		
+		return $this->output_error($message, 400);		
 	}
 	
 	/**
@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	 */
 	public function show_resourceNotFound_exception($message)
 	{
-		$this->output_error($message, 404);
+		return $this->output_error($message, 404);
 	}
 	
 	/**
@@ -40,7 +40,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	 */
 	public function show_nsh_exception($message)
 	{
-		$this->output_error($message, 500);		
+		return $this->output_error($message, 500);		
 	}
 	
 	private function output_error($message, $status_code)
@@ -48,7 +48,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		$this->exception_response['message'] = $message;
 		
 		$api_respone = $this->show_error('', json_encode($this->exception_response), $this->api_error_template, $status_code);
-		echo trim($api_respone, '<p/>');
+		return trim($api_respone, '<p/>');
 	}
 	
  }

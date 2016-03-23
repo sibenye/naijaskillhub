@@ -1,6 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
+require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
+require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
+
 class UserAttributeValues_model extends CI_Model {
 		
 		public function __construct()
@@ -24,7 +28,7 @@ class UserAttributeValues_model extends CI_Model {
 			
 			if (!$result){
 				$message = 'No userAttributeValues found';
-				show_resourceNotFound_exception($message);
+				throw new NSH_ResourceNotFoundException($message);
 			}
 			return $result;
 		        
@@ -57,7 +61,7 @@ class UserAttributeValues_model extends CI_Model {
 			if($result === FALSE)
 	        {
 	        	$message = 'failed to delete userAttributeValue';
-				show_nsh_exception($message);
+				throw new NSH_Exception($message);
 	        }
 		}		
 }

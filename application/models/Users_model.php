@@ -6,6 +6,10 @@ require(APPPATH.'/validations/Users_update_validation.php');
 require(APPPATH.'/objects/user.php');
 use \YaLinqo\Enumerable;
 
+require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
+require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
+require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
+
 class Users_model extends CI_Model {
 		
 		public function __construct()
@@ -24,7 +28,7 @@ class Users_model extends CI_Model {
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array())
 			{				
-				show_validation_exception($this->form_validation->error_array());
+				throw new NSH_ValidationException($this->form_validation->error_array());
 			}
 			
 			$user = $this->insert_user($post_data);
@@ -74,13 +78,13 @@ class Users_model extends CI_Model {
 			if ($emailInUse)
 			{
 				$error_message = "It appears you already have an account with us. Please log with your username/password or your facebook or google account";
-				show_validation_exception($error_message);
+				throw new NSH_ValidationException($error_message);
 			}			
 
 			//ensure that the username/socialId is not in use
 			if ($post_data['credentialType'] == STANDARD_CREDENTIALTYPE && $this->userNameInUse($post_data['username'])){
 				$error_message = "This username is not available";
-				show_validation_exception($error_message);
+				throw new NSH_ValidationException($error_message);
 			}
 			
 			$nowDate = mdate(DATE_TIME_STRING, time());

@@ -16,13 +16,19 @@ class Users extends REST_Controller {
         $this->load->model('Users_model');
     }
 	
-	function users_post(){
-	
-		$post_data = $this->post();
+	function users_post()
+	{	
+		try {
+			$post_data = $this->post();
 			
-    	$this->Users_model->create_user($post_data);
+    		$this->Users_model->create_user($post_data);
      
-    	$this->response(array('status' => 'success'));		
+    		$this->response(array('status' => 'success'));
+		} catch (NSH_ValidationException $e){
+    		show_validation_exception($e->getMessage());
+    	} catch (Exception $e){
+    		show_nsh_exception($e->getMessage());
+    	}				
 	}
 }
 	

@@ -2,6 +2,9 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 require(APPPATH.'/validations/UserAttributes_validation.php');
+require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
+require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
+require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
 
 class UserAttributes_model extends CI_Model {
 	
@@ -26,7 +29,7 @@ class UserAttributes_model extends CI_Model {
 			
 			if (!$result){
 				$message = 'No UserAttributes found';
-				show_resourceNotFound_exception($message);
+				throw new NSH_ResourceNotFoundException($message);
 			}
 			
 			return $result;	        	        
@@ -41,7 +44,7 @@ class UserAttributes_model extends CI_Model {
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array()){
-				show_validation_exception($this->form_validation->error_array());
+				throw new NSH_ValidationException($this->form_validation->error_array());
 			}
 		
 			//ensure that the name does not belong to another
@@ -55,7 +58,7 @@ class UserAttributes_model extends CI_Model {
 	        	{
 					//throw or return error
 					$error_message = 'The name \''.$name.'\' is already in use';
-					show_validation_exception($error_message);
+					throw new NSH_ValidationException($error_message);
 				}
 	        	$id = $post_data['id'];
 	        	$data = array('name' => $post_data['name']);
@@ -66,7 +69,7 @@ class UserAttributes_model extends CI_Model {
 			{
 				//throw or return error
 				$error_message = 'The name \''.$name.'\' is already in use';
-				show_validation_exception($error_message);
+				throw new NSH_ValidationException($error_message);
 			}
 			
 			$this->load->helper('date');
@@ -90,7 +93,7 @@ class UserAttributes_model extends CI_Model {
 			if($result === FALSE)
 	        {
 	        	$message = 'failed to delete userAttribute';
-				show_nsh_exception($message);
+				throw new NSH_Exception($message);
 	        }
 		}
 }

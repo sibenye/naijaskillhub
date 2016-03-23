@@ -1,6 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
+require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
+require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
+
 class CredentialTypes_model extends CI_Model {
 		
 		public function __construct()
@@ -22,7 +26,7 @@ class CredentialTypes_model extends CI_Model {
 	
 	        if (!$result){
 				$message = 'No CredentialTypes found';
-				show_resourceNotFound_exception($message);
+				throw new NSH_ResourceNotFoundException($message);
 			}
 			
 			return $result;

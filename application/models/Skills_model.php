@@ -2,6 +2,9 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 require(APPPATH.'/validations/Skills_validation.php');
+require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
+require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
+require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
 
 class Skills_model extends CI_Model {
 
@@ -30,7 +33,7 @@ class Skills_model extends CI_Model {
 			
 			if (!$result){
 				$message = 'No skills found';
-				show_resourceNotFound_exception($message);
+				throw new NSH_ResourceNotFoundException($message);
 			}	
 			return $result;        
 		}
@@ -44,7 +47,7 @@ class Skills_model extends CI_Model {
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array()){
-				show_validation_exception($this->form_validation->error_array());
+				throw new NSH_ValidationException($this->form_validation->error_array());
 			}
 
 			//ensure that the category Id exists
@@ -52,6 +55,7 @@ class Skills_model extends CI_Model {
 			if(!$existingCategory || empty($existingCategory)){
 				$error_message = "Category Id does not exist";
 				show_validation_exception($error_message);
+				throw new NSH_ValidationException($error_message);
 			}
 			
 			//ensure that the name does not belong to another
@@ -64,7 +68,7 @@ class Skills_model extends CI_Model {
 	        	if ($existingSkill && $existingSkill['id'] !== $post_data['id']){
 					//throw or return error
 					$error_message = 'The name \''.$name.'\' is already in use';
-					show_validation_exception($error_message);
+					throw new NSH_ValidationException($error_message);
 				}
 				
 	        	$id = $post_data['id'];
@@ -79,7 +83,7 @@ class Skills_model extends CI_Model {
 			if ($existingSkill)
 			{
 				$error_message = 'The name \''.$name.'\' is already in use';
-				show_validation_exception($error_message);
+				throw new NSH_ValidationException($error_message);
 			}
 			
 			$this->load->helper('date');
@@ -105,7 +109,7 @@ class Skills_model extends CI_Model {
 			
 			if($result === FALSE)
 	        {
-	            show_nsh_exception('failed to delete skill');
+				throw new NSH_Exception('failed to delete skill');
 	        }
 		}
 		

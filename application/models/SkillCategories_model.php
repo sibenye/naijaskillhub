@@ -2,6 +2,9 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 require(APPPATH.'/validations/SkillCategories_validation.php');
+require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
+require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
+require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
 
 class SkillCategories_model extends CI_Model {
 
@@ -25,7 +28,7 @@ class SkillCategories_model extends CI_Model {
 	
 	        if (!$result){
 				$message = 'No skillCategories found';
-				show_resourceNotFound_exception($message);
+				throw new NSH_ResourceNotFoundException($message);
 			}
 			
 			return $result;
@@ -40,7 +43,7 @@ class SkillCategories_model extends CI_Model {
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array()){
-				show_validation_exception($this->form_validation->error_array());
+				throw new NSH_ValidationException($this->form_validation->error_array());
 			}
 			
 			//ensure that the name does not belong to another
@@ -81,7 +84,7 @@ class SkillCategories_model extends CI_Model {
 			
 			if($result === FALSE)
 	        {
-	        	show_nsh_exception('failed to delete skillCategory');
+	        	throw new NSH_Exception('failed to delete skillCategory');
 	        }
 		}		
 }

@@ -17,7 +17,7 @@ class Admin extends REST_Controller {
         parent::__construct();
         $this->load->model('UserAttributes_model');
 		$this->load->model('CredentialTypes_model');
-		$this->load->model('SkillCategories_model');
+		$this->load->model('Categories_model');
     }
 	
 	/**
@@ -100,19 +100,19 @@ class Admin extends REST_Controller {
 	/**
 	 * Skill Categories
 	 */
-	 function skillCategories_get()
+	 function categories_get()
 	 {
 	 	try {
 	 		if($this->get('id'))
 	        {
-	            $skillCategory = $this->SkillCategories_model->get_skillCategories($this->get('id'));
+	            $category = $this->Categories_model->get_categories($this->get('id'));
 	
-	            $this->response($skillCategory, 200);            
+	            $this->response($category, 200);            
 	        }
 	        
-	        $skillCategories = $this->SkillCategories_model->get_skillCategories();      
+	        $categories = $this->Categories_model->get_categories();      
         
-        	$this->response($skillCategories, 200); 
+        	$this->response($categories, 200); 
 	 	} catch (NSH_ValidationException $e){
     		show_validation_exception($e->getMessage());
     	} catch (NSH_ResourceNotFoundException $e){
@@ -122,12 +122,12 @@ class Admin extends REST_Controller {
     	}	 	
 	 }
 	 
-	 function skillCategories_post()
+	 function categories_post()
 	 {
 	 	try {
 	 		$post_data = $this->post();
 		
-        	$this->SkillCategories_model->save_skillCategory($post_data);
+        	$this->Categories_model->save_category($post_data);
          
         	$this->response(array('status' => 'success'));
 	 	} catch (NSH_ValidationException $e){
@@ -138,11 +138,11 @@ class Admin extends REST_Controller {
 	 	
 	 }
 	 
-	 function skillCategories_delete()
+	 function categories_delete()
 	 {
 	 	try {
 	 		$id = $this->delete('id');
-    		$this->SkillCategories_model->delete_skillCategory($id);
+    		$this->Categories_model->delete_category($id);
         	 
         	$this->response(array('status' => 'success'));
 	 	} catch (Exception $e){

@@ -18,7 +18,6 @@ class Admin extends REST_Controller {
         $this->load->model('UserAttributes_model');
 		$this->load->model('CredentialTypes_model');
 		$this->load->model('SkillCategories_model');
-		$this->load->model('Skills_model');
     }
 	
 	/**
@@ -149,52 +148,6 @@ class Admin extends REST_Controller {
 	 	} catch (Exception $e){
     		show_nsh_exception($e->getMessage());
     	}		 	
-	 }
-	 
-	 /**
-	  * Skills
-	  */
-     function skills_get()
-	 {
-	 	try {
-	 		$skills = $this->Skills_model->get_skills($this->get('id'), $this->get('categoryId'));      
-        
-        	$this->response($skills, 200); 
-	 	} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (NSH_ResourceNotFoundException $e){
-    		show_resourceNotFound_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}	 
-	 	
-	 }
-	 
-	 function skills_post()
-	 {
-	 	try {
-	 		$post_data = $this->post();
-		
-        	$this->Skills_model->save_skill($post_data);
-         
-        	$this->response(array('status' => 'success'));
-	 	} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}	 	
-	 }
-	 
-	 function skills_delete()
-	 {
-	 	try {
-	 		$id = $this->delete('id');
-    		$this->Skills_model->delete_skill($id);
-         
-        	$this->response(array('status' => 'success'));
-	 	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}	 	
-	 }
+	 }	 
 }
     

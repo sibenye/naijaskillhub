@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Skills_validation {
+class Portfolios_validation {
     
     public $validation_rules = array(
 	array('field' => 'categoryId', 'label' => 'Category Id', 'rules' => 'required'),

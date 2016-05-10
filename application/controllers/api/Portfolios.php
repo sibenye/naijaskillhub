@@ -4,27 +4,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require(APPPATH.'/libraries/REST_Controller.php');
 
 /**
- * Skills Controller
+ * Portfolios Controller
  * api requests for skill resources are handled by this Controller. * 
  */
 
-class Skills extends REST_Controller {
+class Portfolios extends REST_Controller {
 	
 	public function __construct()
     {
         parent::__construct();
-        $this->load->model('Skills_model');
+        $this->load->model('Portfolios_model');
     }
 	
 	/**
-	  * Skills
+	  * Portfolios
 	  */
-     function skills_get()
+     function portfolios_get()
 	 {
 	 	try {
-	 		$skills = $this->Skills_model->get_skills($this->get('id'), $this->get('categoryId'));      
+	 		$portfolios = $this->Portfolios_model->get_portfolios($this->get('id'), $this->get('categoryId'));      
         
-        	$this->response($skills, 200); 
+        	$this->response($portfolios, 200); 
 	 	} catch (NSH_ValidationException $e){
     		show_validation_exception($e->getMessage());
     	} catch (NSH_ResourceNotFoundException $e){
@@ -35,12 +35,12 @@ class Skills extends REST_Controller {
 	 	
 	 }
 	 
-	 function skills_post()
+	 function portfolios_post()
 	 {
 	 	try {
 	 		$post_data = $this->post();
 		
-        	$this->Skills_model->save_skill($post_data);
+        	$this->Portfolios_model->save_portfolio($post_data);
          
         	$this->response(array('status' => 'success'));
 	 	} catch (NSH_ValidationException $e){
@@ -50,11 +50,11 @@ class Skills extends REST_Controller {
     	}	 	
 	 }
 	 
-	 function skills_delete()
+	 function portfolios_delete()
 	 {
 	 	try {
 	 		$id = $this->delete('id');
-    		$this->Skills_model->delete_skill($id);
+    		$this->Portfolios_model->delete_portfolio($id);
          
         	$this->response(array('status' => 'success'));
 	 	} catch (Exception $e){

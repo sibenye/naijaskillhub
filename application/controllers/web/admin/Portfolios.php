@@ -9,8 +9,8 @@ class Skills extends CI_Controller {
 	public function __construct()
     {
         parent::__construct();
-        $this->load->model('SkillCategories_model');
-		$this->load->model('Skills_model');
+        $this->load->model('Categories_model');
+		$this->load->model('Portfolios_model');
     }
 	
 	/**
@@ -21,8 +21,8 @@ class Skills extends CI_Controller {
 	 */
 	public function index()
 	{
-		$skillCategories = $this->SkillCategories_model->get_skillCategories();
-		$skills = $this->Skills_model->get_skills();
+		$skillCategories = $this->Categories_model->get_categories();
+		$skills = $this->Portfolios_model->get_portfolios();
 		
 		$skillsByCategory = Enumerable::from($skillCategories)
 	    ->orderBy('$cat ==> $cat["name"]')
@@ -53,7 +53,7 @@ class Skills extends CI_Controller {
 	
 	    if (count($_POST) === 0)
 	    {
-	    	$this->view_bag['skillCategories'] = $this->SkillCategories_model->get_skillCategories();
+	    	$this->view_bag['skillCategories'] = $this->Categories_model->get_categories();
 	        $this->template->load(ADMIN_TEMPLATE_NAME, 'admin/skills/create', $this->view_bag);	
 	    }
 	    else
@@ -66,7 +66,7 @@ class Skills extends CI_Controller {
 
 	        $post_data = $this->input->post();
 			$post_data['imageName'] = $upload_data['file_name'];
-	        $result = $this->Skills_model->save_skill($post_data);
+	        $result = $this->Portfolios_model->save_portfolio($post_data);
 			if($result['error']){
 				$this->view_bag['error'] = $result['error'];
 				$this->template->load(ADMIN_TEMPLATE_NAME, 'admin/skills/create', $this->view_bag);	
@@ -87,14 +87,14 @@ class Skills extends CI_Controller {
 	
 	    if (count($_POST) === 0)
 	    {
-	    	$this->view_bag['skill'] = $this->Skills_model->get_skills($id, $categoryId);
+	    	$this->view_bag['skill'] = $this->Portfolios_model->get_portfolios($id, $categoryId);
 			
 	        if (empty($this->view_bag['skill']))
 	        {
 	                show_404();
 	        }
 			
-			$this->view_bag['skillCategories'] = $this->SkillCategories_model->get_skillCategories();
+			$this->view_bag['skillCategories'] = $this->Categories_model->get_categories();
 			
 			$this->view_bag['title'] = 'Edit Skill - '.$this->view_bag['skill']['name'];
 			
@@ -105,7 +105,7 @@ class Skills extends CI_Controller {
 	    	$upload_data = $this->upload_image('image_filename');
 			if(array_key_exists('error', $upload_data)){
 				$id = $this->input->post('id');
-				$this->view_bag['skill'] = $this->Skills_model->get_skills($id, $categoryId);
+				$this->view_bag['skill'] = $this->Portfolios_model->get_portfolios($id, $categoryId);
 								
 	        	$this->view_bag['title'] = 'Edit Skill - '.$this->view_bag['skill']['name'];
 				$this->view_bag['error'] = $upload_data['error'];
@@ -114,11 +114,11 @@ class Skills extends CI_Controller {
 			
 	       	$post_data = $this->input->post();
 			$post_data['imageName'] = $upload_data['file_name']? $upload_data['file_name'] : $post_data['imageName'];
-	        $result= $this->Skills_model->save_skill($post_data);
+	        $result= $this->Portfolios_model->save_portfolio($post_data);
 			
 	        if($result['error']){
 	        	$id = $this->input->post('id');
-				$this->view_bag['skill'] = $this->Skills_model->get_skills($id, $categoryId);
+				$this->view_bag['skill'] = $this->Portfolios_model->get_portfolios($id, $categoryId);
 								
 	        	$this->view_bag['title'] = 'Edit Skill - '.$this->view_bag['skill']['name'];
 				$this->view_bag['error'] = $result['error'];
@@ -133,14 +133,14 @@ class Skills extends CI_Controller {
 
 	public function delete($id = NULL)
 	{
-	    $this->view_bag['skill'] = $this->Skills_model->get_skills($id);
+	    $this->view_bag['skill'] = $this->Portfolios_model->get_portfolios($id);
 
         if (empty($this->view_bag['skill']))
         {
                 show_404();
         }
 		
-		$this->Skills_model->delete_skill($id);
+		$this->Portfolios_model->delete_portfolio($id);
 		$this->view_bag['success'] = 'Skill was successfully deleted.';
 		$this->index();
 	}

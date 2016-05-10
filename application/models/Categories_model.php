@@ -1,43 +1,43 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-require(APPPATH.'/validations/SkillCategories_validation.php');
+require(APPPATH.'/validations/Categories_validation.php');
 require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
 require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
 require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
 
-class SkillCategories_model extends CI_Model {
+class Categories_model extends CI_Model {
 
         public function __construct()
         {
                 $this->load->database();
         }
 		
-		public function get_skillCategories($id = FALSE)
+		public function get_categories($id = FALSE)
 		{
 			$result = NULL;
 			
 	        if ($id === FALSE)
 	        {
-                $query = $this->db->get('skillCategories');
+                $query = $this->db->get('categories');
                 $result = $query->result_array();
 	        } else {
-	        	$query = $this->db->get_where('skillCategories', array('id' => $id));			
+	        	$query = $this->db->get_where('categories', array('id' => $id));			
 	        	$result = $query->row_array();
 	        }
 	
 	        if (!$result){
-				$message = 'No skillCategories found';
+				$message = 'No categories found';
 				throw new NSH_ResourceNotFoundException($message);
 			}
 			
 			return $result;
 		}
 		
-		public function save_skillCategory($post_data)
+		public function save_category($post_data)
 		{
 			//validate post data
-			$this->validation = new SkillCategories_validation();
+			$this->validation = new Categories_validation();
 			$rules = $this->validation->validation_rules;
 			
 			$this->load->library('form_validation', $rules);
@@ -48,7 +48,7 @@ class SkillCategories_model extends CI_Model {
 			
 			//ensure that the name does not belong to another
 			$name = $post_data['name'];
-	        $query = $this->db->get_where('skillCategories', array('name' => $name));
+	        $query = $this->db->get_where('categories', array('name' => $name));
 			$existingCategory = $query->row_array();
 			
 			if (!empty($post_data['id']))
@@ -60,7 +60,7 @@ class SkillCategories_model extends CI_Model {
 				
 	        	$id = $post_data['id'];
 	        	$data = array('name' => $post_data['name']);
-				return $this->db->update('skillCategories', $data, array('id' => $id));
+				return $this->db->update('categories', $data, array('id' => $id));
 			}
 			
 			if ($existingCategory)
@@ -73,14 +73,14 @@ class SkillCategories_model extends CI_Model {
 		        'name' => $post_data['name']
 		    );
 		
-		    return $this->db->insert('skillCategories', $data);
+		    return $this->db->insert('categories', $data);
 		}
 		
-		public function delete_skillCategory($id)
+		public function delete_category($id)
 		{
-			//all the skills in this category will also be deleted			
-			$this->db->delete('skills', array('categoryId' => $id));
-			$result = $this->db->delete('skillCategories', array('id' => $id));
+			//all the portfolios in this category will also be deleted			
+			$this->db->delete('portfolios', array('categoryId' => $id));
+			$result = $this->db->delete('categories', array('id' => $id));
 			
 			if($result === FALSE)
 	        {

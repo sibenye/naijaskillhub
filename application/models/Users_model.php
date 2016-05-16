@@ -1,10 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-require(APPPATH.'/validations/Users_creation_validation.php');
-require(APPPATH.'/validations/Users_update_validation.php');
-require(APPPATH.'/objects/user.php');
-use \YaLinqo\Enumerable;
+require(APPPATH.'/core/validations/Users_creation_validation.php');
+require(APPPATH.'/core/validations/Users_update_validation.php');
+require(APPPATH.'/core/objects/user.php');
 
 require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
 require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');

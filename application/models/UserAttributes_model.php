@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-require(APPPATH.'/validations/UserAttributes_validation.php');
+require(APPPATH.'/core/validations/UserAttributes_validation.php');
 require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
 require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
 require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');

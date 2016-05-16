@@ -25,13 +25,9 @@ class Portfolios extends REST_Controller {
 	 		$portfolios = $this->Portfolios_model->get_portfolios($this->get('id'), $this->get('categoryId'));      
         
         	$this->response($portfolios, 200); 
-	 	} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (NSH_ResourceNotFoundException $e){
-    		show_resourceNotFound_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}	 
+	 	} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    	}
 	 	
 	 }
 	 
@@ -43,11 +39,9 @@ class Portfolios extends REST_Controller {
         	$this->Portfolios_model->save_portfolio($post_data);
          
         	$this->response(array('status' => 'success'));
-	 	} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}	 	
+	 	} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    	} 	
 	 }
 	 
 	 function portfolios_delete()
@@ -57,8 +51,8 @@ class Portfolios extends REST_Controller {
     		$this->Portfolios_model->delete_portfolio($id);
          
         	$this->response(array('status' => 'success'));
-	 	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
+	 	} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
     	}	 	
 	 }		
 }

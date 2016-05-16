@@ -31,7 +31,7 @@ class Portfolios_model extends CI_Model {
 				$results[0] = $query->row_array();
 	        }
 			
-			if (!$results || count($results) == 0){
+			if (!$results || count($results) == 0 || $results[0] == NULL){
 				$message = 'No portfolios found';
 				throw new NSH_ResourceNotFoundException($message);
 			}
@@ -43,7 +43,7 @@ class Portfolios_model extends CI_Model {
 				
 				$results[$key]['videos'] = $videos;
 				$results[$key]['images'] = $images;
-			}						
+			}
 	
 			return $results;        
 		}

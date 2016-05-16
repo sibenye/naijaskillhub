@@ -24,11 +24,9 @@ class Users extends REST_Controller {
     		$this->Users_model->create_user($post_data);
      
     		$this->response(array('status' => 'success'));
-		} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}				
+		} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    	}		
 	}
 }
 	

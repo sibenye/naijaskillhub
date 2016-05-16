@@ -36,13 +36,9 @@ class Admin extends REST_Controller {
 	        
 	        $userAttributes = $this->UserAttributes_model->get_userAttributes(); 
 			$this->response($userAttributes, 200);
-    	} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (NSH_ResourceNotFoundException $e){
-    		show_resourceNotFound_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}		
+    	} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    	}
     }
     
     function userAttributes_post()
@@ -54,7 +50,7 @@ class Admin extends REST_Controller {
 	         
 	        $this->response(array('status' => 'success'));
     	} catch (NSH_Exception $e){
-    		show_nsh_exception($e->getMessage());
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
     	}			
     }
 	
@@ -66,7 +62,7 @@ class Admin extends REST_Controller {
 	         
 	        $this->response(array('status' => 'success'));
     	} catch (NSH_Exception $e){
-    		show_nsh_exception($e->getMessage());
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
     	}    	
     }
 	
@@ -87,13 +83,9 @@ class Admin extends REST_Controller {
 	        $credentialTypes = $this->CredentialTypes_model->get_credentialTypes();      
 	        
 	        $this->response($credentialTypes, 200);
-    	} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (NSH_ResourceNotFoundException $e){
-    		show_resourceNotFound_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}	
+    	} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    	}
         
     }
 	
@@ -113,13 +105,9 @@ class Admin extends REST_Controller {
 	        $categories = $this->Categories_model->get_categories();      
         
         	$this->response($categories, 200); 
-	 	} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (NSH_ResourceNotFoundException $e){
-    		show_resourceNotFound_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}	 	
+	 	} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    	}	
 	 }
 	 
 	 function categories_post()
@@ -130,11 +118,9 @@ class Admin extends REST_Controller {
         	$this->Categories_model->save_category($post_data);
          
         	$this->response(array('status' => 'success'));
-	 	} catch (NSH_ValidationException $e){
-    		show_validation_exception($e->getMessage());
-    	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
-    	}	
+	 	} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    	}
 	 	
 	 }
 	 
@@ -145,8 +131,8 @@ class Admin extends REST_Controller {
     		$this->Categories_model->delete_category($id);
         	 
         	$this->response(array('status' => 'success'));
-	 	} catch (Exception $e){
-    		show_nsh_exception($e->getMessage());
+	 	} catch (NSH_Exception $e){
+    		$this->response($e->getErrorMessage(), $e->getStatusCode());
     	}		 	
 	 }	 
 }

@@ -7,7 +7,7 @@ require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
 require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
 
 /**
- * Models the Categories table
+ * Model the Categories table
  * 
  * @author Silver
  *

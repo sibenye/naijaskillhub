@@ -17,10 +17,10 @@ class CredentialTypes_model extends CI_Model {
 			$result = NULL;
 	        if ($id === FALSE)
 	        {
-                $query = $this->db->get('credentialTypes');
+                $query = $this->db->get(CREDENTIALTYPES_TABLE);
                 $result = $query->result_array();
 	        } else {
-	        	$query = $this->db->get_where('credentialTypes', array('id' => $id));			
+	        	$query = $this->db->get_where(CREDENTIALTYPES_TABLE, array('id' => $id));			
 	        	$result = $query->row_array();
 	        }
 	
@@ -38,14 +38,14 @@ class CredentialTypes_model extends CI_Model {
 	        {
 	        	$id = $post_data['id'];
 	        	$data = array('name' => $post_data['name']);
-				return $this->db->update('credentialTypes', $data, array('id' => $id));
+				return $this->db->update(CREDENTIALTYPES_TABLE, $data, array('id' => $id));
 			}
 			
 			$data = array(
 		        'name' => $post_data['name']
 		    );
 		
-		    return $this->db->insert('credentialTypes', $data);
+		    return $this->db->insert(CREDENTIALTYPES_TABLE, $data);
 		}
 }
 	

@@ -16,13 +16,13 @@ class UserAttributeValues_model extends CI_Model {
 		{
 			$result = NULL;
 			if (!empty($userId) && empty($attributeId)){
-				$query = $this->db->get_where('userAttributeValues', array('userId' => $userId));
+				$query = $this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userId' => $userId));
 	        	$result = $query->result_array();
 			}elseif (empty($userId) && !empty($attributeId)){
-				$query = $this->db->get_where('userAttributeValues', array('attributeId' => $attributeId));
+				$query = $this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('attributeId' => $attributeId));
 	        	$result = $query->result_array();
 			}elseif (!empty($userId) && !empty($attributeId)){
-				$query = $this->db->get_where('userAttributeValues', array('userId' => $userId, 'attributeId' => $attributeId));
+				$query = $this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userId' => $userId, 'attributeId' => $attributeId));
 	        	$result = $query->row_array();
 			}
 			
@@ -42,7 +42,7 @@ class UserAttributeValues_model extends CI_Model {
 		        'attributeValue' => $post_data['attributeValue'],
 		    );
 		
-		    return $this->db->insert('userAttributeValues', $data);
+		    return $this->db->insert(USERATTRIBUTEVALUES_TABLE, $data);
 		}
 		
 		public function update_userAttributeValue($post_data)
@@ -51,12 +51,12 @@ class UserAttributeValues_model extends CI_Model {
 		        'attributeValue' => $post_data['attributeValue'],
 		    );
 		
-		    return $this->db->update('userAttributeValues', $data, array('attributeId' => $post_data['userAttributeId'], 'userId' => $post_data['userId']));
+		    return $this->db->update(USERATTRIBUTEVALUES_TABLE, $data, array('attributeId' => $post_data['userAttributeId'], 'userId' => $post_data['userId']));
 		}
 		
 		public function delete_userAttributeValue($attributeId, $userId)
 		{		
-		    $result = $this->db->delete('userAttributeValues', array('attributeId' => $attributeId, 'userId' => $userId));
+		    $result = $this->db->delete(USERATTRIBUTEVALUES_TABLE, array('attributeId' => $attributeId, 'userId' => $userId));
 			
 			if($result === FALSE)
 	        {

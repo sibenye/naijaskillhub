@@ -20,10 +20,10 @@ class UserAttributes_model extends CI_Model {
 			$result = NULL;
 			if ($id === FALSE)
 	        {
-                $query = $this->db->get('userAttributes');
+                $query = $this->db->get(USERATTRIBUTES_TABLE);
                 $result = $query->result_array();
 	        } else {
-	        	$query = $this->db->get_where('userAttributes', array('id' => $id));				
+	        	$query = $this->db->get_where(USERATTRIBUTES_TABLE, array('id' => $id));				
 		        $result = $query->row_array();	
 	        }
 			
@@ -49,7 +49,7 @@ class UserAttributes_model extends CI_Model {
 		
 			//ensure that the name does not belong to another
 			$name = $post_data['name'];
-	        $query = $this->db->get_where('userAttributes', array('name' => $name));
+	        $query = $this->db->get_where(USERATTRIBUTES_TABLE, array('name' => $name));
 			$existingUserAttribute = $query->row_array();
 			
 			if (!empty($post_data['id']))
@@ -62,7 +62,7 @@ class UserAttributes_model extends CI_Model {
 				}
 	        	$id = $post_data['id'];
 	        	$data = array('name' => $post_data['name']);
-				return $this->db->update('userAttributes', $data, array('id' => $id));
+				return $this->db->update(USERATTRIBUTES_TABLE, $data, array('id' => $id));
 			}
 			
 			if ($existingUserAttribute)
@@ -84,12 +84,12 @@ class UserAttributes_model extends CI_Model {
 		        'createdDate' => $nowDate
 		    );
 		
-		    return $this->db->insert('userAttributes', $data);			
+		    return $this->db->insert(USERATTRIBUTES_TABLE, $data);			
 		}
 		
 		public function delete_userAttribute($id)
 		{
-			$result = $this->db->delete('userAttributes', array('id' => $id));
+			$result = $this->db->delete(USERATTRIBUTES_TABLE, array('id' => $id));
 			if($result === FALSE)
 	        {
 	        	$message = 'failed to delete userAttribute';

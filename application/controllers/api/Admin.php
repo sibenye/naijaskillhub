@@ -95,14 +95,8 @@ class Admin extends REST_Controller {
 	 function categories_get()
 	 {
 	 	try {
-	 		if($this->get('id'))
-	        {
-	            $category = $this->Categories_model->get_categories($this->get('id'));
-	
-	            $this->response($category, 200);            
-	        }
-	        
-	        $categories = $this->Categories_model->get_categories();      
+	 			        
+	        $categories = $this->Categories_model->get_categories($this->get('id'), $this->get('parentId'));      
         
         	$this->response($categories, 200); 
 	 	} catch (NSH_Exception $e){

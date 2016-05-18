@@ -18,16 +18,16 @@ class Portfolios_model extends CI_Model {
 			$results = array();
 	        if (!$id && !$categoryId)
 	        {
-                $query = $this->db->get('portfolios');
+                $query = $this->db->get(PORTFOLIOS_TABLE);
 				$results = $query->result_array();
 	        }elseif ($id && $categoryId){
-	        	$query = $this->db->get_where('portfolios', array('id' => $id, 'categoryId' => $categoryId));
+	        	$query = $this->db->get_where(PORTFOLIOS_TABLE, array('id' => $id, 'categoryId' => $categoryId));
 				$results[0] = $query->row_array();
 	        }elseif ($categoryId){
-	        	$query = $this->db->get_where('portfolios', array('categoryId' => $categoryId));
+	        	$query = $this->db->get_where(PORTFOLIOS_TABLE, array('categoryId' => $categoryId));
 				$results = $query->result_array();
 	        }else{
-	        	$query = $this->db->get_where('portfolios', array('id' => $id));					
+	        	$query = $this->db->get_where(PORTFOLIOS_TABLE, array('id' => $id));					
 				$results[0] = $query->row_array();
 	        }
 			
@@ -38,8 +38,8 @@ class Portfolios_model extends CI_Model {
 			
 			foreach ($results as $key => $value) {
 				//retrieve images and videos
-				$videos = $this->db->get_where('portfolios_videos_link', array('portfolioId' => $results[$key]['id']))->result_array();
-				$images = $this->db->get_where('portfolios_images_link', array('portfolioId' => $results[$key]['id']))->result_array();
+				$videos = $this->db->get_where(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
+				$images = $this->db->get_where(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
 				
 				$results[$key]['videos'] = $videos;
 				$results[$key]['images'] = $images;
@@ -61,7 +61,7 @@ class Portfolios_model extends CI_Model {
 			}
 
 			//ensure that the category Id exists
-			$existingCategory = $this->db->get_where('categories', array('id' => $post_data['categoryId']))->row_array();
+			$existingCategory = $this->db->get_where(CATEGORIES_TABLE, array('id' => $post_data['categoryId']))->row_array();
 			if(!$existingCategory || empty($existingCategory)){
 				$error_message = "Category does not exist";
 				show_validation_exception($error_message);
@@ -69,7 +69,7 @@ class Portfolios_model extends CI_Model {
 			}
 			
 			//ensure that the user exists
-			$existingUser = $this->db->get_where('users', array('id' => $post_data['userId']))->row_array();
+			$existingUser = $this->db->get_where(USERS_TABLE, array('id' => $post_data['userId']))->row_array();
 			if(!$existingUser || empty($existingUser)){
 				$error_message = "User does not exist";
 				show_validation_exception($error_message);
@@ -77,7 +77,7 @@ class Portfolios_model extends CI_Model {
 			}
 			
 			//check if user already has a portfolio in this category
-			$existingPortfolio = $this->db->get_where('portfolios', array('userId' => $existingUser['id'], 'categoryId' => $existingCategory['id']))->row_array();
+			$existingPortfolio = $this->db->get_where(PORTFOLIOS_TABLE, array('userId' => $existingUser['id'], 'categoryId' => $existingCategory['id']))->row_array();
 			
 			$this->load->helper('date');
 			
@@ -92,7 +92,7 @@ class Portfolios_model extends CI_Model {
 	        	$data = array(
 	        	'modifiedDate' => $nowDate);
 				
-				$this->db->update('portfolios', $data, array('id' => $id));
+				$this->db->update(PORTFOLIOS_TABLE, $data, array('id' => $id));
 			} else{
 				$data = array(
 			        'categoryId' => $post_data['categoryId'],
@@ -101,8 +101,8 @@ class Portfolios_model extends CI_Model {
 			        'modifiedDate' => $nowDate
 			    );
 		
-		    	$this->db->insert('portfolios', $data);
-		    	$existingPortfolio = $this->db->get_where('portfolios', array('userId' => $existingUser['id'], 'categoryId' => $existingCategory['id']))->row_array();
+		    	$this->db->insert(PORTFOLIOS_TABLE, $data);
+		    	$existingPortfolio = $this->db->get_where(PORTFOLIOS_TABLE, array('userId' => $existingUser['id'], 'categoryId' => $existingCategory['id']))->row_array();
 				$id = $existingPortfolio['id'];
 			}			
 				
@@ -127,7 +127,7 @@ class Portfolios_model extends CI_Model {
 			$this->delete_portfolio_videos($id);
 			$this->delete_portfolio_images($id);
 			
-			$result = $this->db->delete('portfolios', array('id' => $id));
+			$result = $this->db->delete(PORTFOLIOS_TABLE, array('id' => $id));
 			
 			if($result === FALSE)
 	        {
@@ -141,7 +141,7 @@ class Portfolios_model extends CI_Model {
 				$portfolioImagesInRequest[$i] = strtolower($post_data['images'][$i]['imageUrl']);
 			}
 
-			$existingPortfolioImages = $this->db->get_where('portfolios_images_link', array('portfolioId' => $portfolioId))->result_array();
+			$existingPortfolioImages = $this->db->get_where(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $portfolioId))->result_array();
 			$existImageUrls = array();
 			
 			//delete existing portfolio images that are not in the request
@@ -156,7 +156,7 @@ class Portfolios_model extends CI_Model {
 			foreach ($portfolioImagesInRequest as $value) {
 				if (!in_array($value, $existImageUrls)){
 					$data = array('portfolioId' => $portfolioId, 'imageUrl' => $value);
-					$this->db->insert('portfolios_images_link', $data);
+					$this->db->insert(PORTFOLIOS_IMAGES_LINK_TABLE, $data);
 				}
 			}			
 		}
@@ -167,7 +167,7 @@ class Portfolios_model extends CI_Model {
 				$portfolioVideosInRequest[$i] = strtolower($post_data['videos'][$i]['videoUrl']);
 			}
 
-			$existingPortfolioVideos = $this->db->get_where('portfolios_videos_link', array('portfolioId' => $portfolioId))->result_array();
+			$existingPortfolioVideos = $this->db->get_where(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $portfolioId))->result_array();
 			$existVideoUrls = array();
 			
 			//delete existing portfolio videos that are not in the request
@@ -182,7 +182,7 @@ class Portfolios_model extends CI_Model {
 			foreach ($portfolioVideosInRequest as $value) {
 				if (!in_array($value, $existVideoUrls)){
 					$data = array('portfolioId' => $portfolioId, 'videoUrl' => $value);
-					$this->db->insert('portfolios_videos_link', $data);
+					$this->db->insert(PORTFOLIOS_VIDEOS_LINK_TABLE, $data);
 				}
 			}			
 		}
@@ -190,18 +190,18 @@ class Portfolios_model extends CI_Model {
 		private function delete_portfolio_images($portfolioId, $imageUrl = NULL)
 		{
 			if ($imageUrl == NULL){
-				$result = $this->db->delete('portfolios_images_link', array('portfolioId' => $portfolioId));
+				$result = $this->db->delete(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $portfolioId));
 			} else {
-				$result = $this->db->delete('portfolios_images_link', array('portfolioId' => $portfolioId, 'imageUrl' => $imageUrl));
+				$result = $this->db->delete(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $portfolioId, 'imageUrl' => $imageUrl));
 			}			
 		}
 		
 		private function delete_portfolio_videos($portfolioId, $videoUrl = NULL)
 		{
 			if ($videoUrl == NULL){
-				$result = $this->db->delete('portfolios_videos_link', array('portfolioId' => $portfolioId));
+				$result = $this->db->delete(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $portfolioId));
 			} else {
-				$result = $this->db->delete('portfolios_videos_link', array('portfolioId' => $portfolioId, 'videoUrl' => $videoUrl));
+				$result = $this->db->delete(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $portfolioId, 'videoUrl' => $videoUrl));
 			}			
 		}
 		

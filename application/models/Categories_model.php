@@ -19,10 +19,10 @@ class Categories_model extends CI_Model {
 			
 	        if ($id === FALSE)
 	        {
-                $query = $this->db->get('categories');
+                $query = $this->db->get(CATEGORIES_TABLE);
                 $result = $query->result_array();
 	        } else {
-	        	$query = $this->db->get_where('categories', array('id' => $id));			
+	        	$query = $this->db->get_where(CATEGORIES_TABLE, array('id' => $id));			
 	        	$result = $query->row_array();
 	        }
 	
@@ -48,7 +48,7 @@ class Categories_model extends CI_Model {
 			
 			//ensure that the name does not belong to another
 			$name = $post_data['name'];
-	        $query = $this->db->get_where('categories', array('name' => $name));
+	        $query = $this->db->get_where(CATEGORIES_TABLE, array('name' => $name));
 			$existingCategory = $query->row_array();
 			
 			if (!empty($post_data['id']))
@@ -60,7 +60,7 @@ class Categories_model extends CI_Model {
 				
 	        	$id = $post_data['id'];
 	        	$data = array('name' => $post_data['name']);
-				return $this->db->update('categories', $data, array('id' => $id));
+				return $this->db->update(CATEGORIES_TABLE, $data, array('id' => $id));
 			}
 			
 			if ($existingCategory)
@@ -73,14 +73,14 @@ class Categories_model extends CI_Model {
 		        'name' => $post_data['name']
 		    );
 		
-		    return $this->db->insert('categories', $data);
+		    return $this->db->insert(CATEGORIES_TABLE, $data);
 		}
 		
 		public function delete_category($id)
 		{
 			//all the portfolios in this category will also be deleted			
 			$this->db->delete('portfolios', array('categoryId' => $id));
-			$result = $this->db->delete('categories', array('id' => $id));
+			$result = $this->db->delete(CATEGORIES_TABLE, array('id' => $id));
 			
 			if($result === FALSE)
 	        {

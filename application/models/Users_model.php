@@ -39,12 +39,12 @@ class Users_model extends CI_Model {
 		{
 			$this->db->select('id');
 			
-			$credentialTypeResult = $this->db->get_where('credentialtypes',
+			$credentialTypeResult = $this->db->get_where(CREDENTIALTYPES_TABLE,
 			 array('name' => $post_data['credentialType']))->row_array();
 			 
 			$credentialTypeId = $credentialTypeResult['id'];
 			
-			$userCredentialsQueryResult = $this->db->get_where('usercredentials',
+			$userCredentialsQueryResult = $this->db->get_where(USERCREDENTIALS_TABLE,
 			 array('userId' => $userId, 'credentialTypeId' => $credentialTypeId))->row_array();
 						
 			if (empty($userCredentialsQueryResult))
@@ -65,7 +65,7 @@ class Users_model extends CI_Model {
 					$data['socialId'] = $post_data['socialId'];
 				}
 			
-			    $this->db->insert('usercredentials', $data);
+			    $this->db->insert(USERCREDENTIALS_TABLE, $data);
 			}
 		}
 		
@@ -104,9 +104,9 @@ class Users_model extends CI_Model {
 				$data['lastName'] = $post_data['lastName'];
 			}
 		
-		    $this->db->insert('users', $data);
+		    $this->db->insert(USERS_TABLE, $data);
 			//retrieve the just created user
-			$userQueryResult = $this->db->get_where('users', array('email' => $post_data['email']))->row_array();
+			$userQueryResult = $this->db->get_where(USERS_TABLE, array('email' => $post_data['email']))->row_array();
 			
 			$user = new User();
 			$user->userId = $userQueryResult['id'];
@@ -120,7 +120,7 @@ class Users_model extends CI_Model {
 		
 		private function userEmailInUse($email)
 		{
-			$query = $this->db->get_where('users', array('email' => $email));
+			$query = $this->db->get_where(USERS_TABLE, array('email' => $email));
 			$row = $query->row_array();
 			if ($row && count($row) > 0){
 				return true;
@@ -131,7 +131,7 @@ class Users_model extends CI_Model {
 		
 		private function userNameInUse($username)
 		{
-			$query = $this->db->get_where('users', array('username' => $username));
+			$query = $this->db->get_where(USERS_TABLE, array('username' => $username));
 			$row = $query->row_array();
 			if ($row && count($row) > 0){
 				return true;

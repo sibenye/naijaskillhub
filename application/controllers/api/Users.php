@@ -25,7 +25,7 @@ class Users extends REST_Controller {
      
     		$this->response(array('status' => 'success'));
 		} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
     	}		
 	}
 }

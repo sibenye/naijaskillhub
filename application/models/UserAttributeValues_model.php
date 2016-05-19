@@ -28,7 +28,7 @@ class UserAttributeValues_model extends CI_Model {
 			
 			if (!$result){
 				$message = 'No userAttributeValues found';
-				throw new NSH_ResourceNotFoundException($message);
+				throw new NSH_ResourceNotFoundException(220, $message);
 			}
 			return $result;
 		        
@@ -61,7 +61,7 @@ class UserAttributeValues_model extends CI_Model {
 			if($result === FALSE)
 	        {
 	        	$message = 'failed to delete userAttributeValue';
-				throw new NSH_Exception($message);
+				throw new NSH_Exception(100, $message);
 	        }
 		}		
 }

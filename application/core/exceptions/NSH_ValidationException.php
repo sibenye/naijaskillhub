@@ -4,9 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class NSH_ValidationException extends NSH_Exception {
 		
-	function __construct($message='')
+	function __construct($errorCode, $errorDetail = '')
     {
-        parent::__construct(json_encode($message), 400);		
+        parent::__construct($errorCode, json_encode($errorDetail), 400);		
 	}	
 }
 	

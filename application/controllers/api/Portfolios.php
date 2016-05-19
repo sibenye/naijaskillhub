@@ -1,14 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-require(APPPATH.'/libraries/REST_Controller.php');
+require(APPPATH.'/controllers/api/NSH_Controller.php');
 
 /**
  * Portfolios Controller
  * api requests for skill resources are handled by this Controller. * 
  */
 
-class Portfolios extends REST_Controller {
+class Portfolios extends NSH_Controller {
 	
 	public function __construct()
     {
@@ -24,9 +24,9 @@ class Portfolios extends REST_Controller {
 	 	try {
 	 		$portfolios = $this->Portfolios_model->get_portfolios($this->get('id'), $this->get('categoryId'));      
         
-        	$this->response($portfolios, 200); 
+        	$this->successResponse($portfolios); 
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}
 	 	
 	 }
@@ -38,9 +38,9 @@ class Portfolios extends REST_Controller {
 		
         	$this->Portfolios_model->save_portfolio($post_data);
          
-        	$this->response(array('status' => 'success'));
+        	$this->successResponse();
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	} 	
 	 }
 	 
@@ -50,9 +50,9 @@ class Portfolios extends REST_Controller {
 	 		$id = $this->delete('id');
     		$this->Portfolios_model->delete_portfolio($id);
          
-        	$this->response(array('status' => 'success'));
+        	$this->successResponse();
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}	 	
 	 }		
 }

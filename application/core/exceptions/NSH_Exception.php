@@ -26,9 +26,4 @@ require_once (APPPATH.'/config/errorCodes.php');
 	{
 		return $this->error_detail;
 	}
-	
-	public function getErrorMessage()
-	{
-		return array('status' => $this->getCode(), 'message' => $this->getMessage(), 'errordetail' => $this->error_detail);
-	}
  }

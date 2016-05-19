@@ -1,14 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-require(APPPATH.'/libraries/REST_Controller.php');
+require(APPPATH.'/controllers/api/NSH_Controller.php');
 
 /**
  * Users Controller
  * api requests for user resources are handled by this Controller. * 
  */
 
-class Users extends REST_Controller {
+class Users extends NSH_Controller {
 	
 	public function __construct()
     {
@@ -23,9 +23,9 @@ class Users extends REST_Controller {
 			
     		$this->Users_model->create_user($post_data);
      
-    		$this->response(array('status' => 'success'));
+    		$this->successResponse();
 		} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}		
 	}
 }

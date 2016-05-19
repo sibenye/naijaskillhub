@@ -1,14 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-require(APPPATH.'/libraries/REST_Controller.php');
+require(APPPATH.'/controllers/api/NSH_Controller.php');
 
 /**
  * Admin Controller
  * api requests for admin resources are handled by this Controller. * 
  */
 
-class Admin extends REST_Controller {
+class Admin extends NSH_Controller {
     
     private $validation;
     
@@ -35,9 +35,9 @@ class Admin extends REST_Controller {
 	        }
 	        
 	        $userAttributes = $this->UserAttributes_model->get_userAttributes(); 
-			$this->response($userAttributes, 200);
+			$this->successResponse($userAttributes);
     	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}
     }
     
@@ -48,9 +48,9 @@ class Admin extends REST_Controller {
 			
 	        $this->UserAttributes_model->save_userAttribute($post_data);
 	         
-	        $this->response(array('status' => 'success'));
+	        $this->successResponse();
     	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}			
     }
 	
@@ -60,9 +60,9 @@ class Admin extends REST_Controller {
     		$id = $this->delete('id');
 	    	$this->UserAttributes_model->delete_userAttribute($id);
 	         
-	        $this->response(array('status' => 'success'));
+	        $this->successResponse();
     	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}    	
     }
 	
@@ -82,9 +82,9 @@ class Admin extends REST_Controller {
 	        
 	        $credentialTypes = $this->CredentialTypes_model->get_credentialTypes();      
 	        
-	        $this->response($credentialTypes, 200);
+	        $this->successResponse($credentialTypes);
     	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}
         
     }
@@ -98,9 +98,9 @@ class Admin extends REST_Controller {
 	 			        
 	        $categories = $this->Categories_model->get_categories($this->get('id'), $this->get('parentId'));      
         
-        	$this->response($categories, 200); 
+        	$this->successResponse($categories); 
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}	
 	 }
 	 
@@ -111,9 +111,9 @@ class Admin extends REST_Controller {
 		
         	$this->Categories_model->save_category($post_data);
          
-        	$this->response(array('status' => 'success'));
+        	$this->successResponse();
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}
 	 	
 	 }
@@ -124,9 +124,9 @@ class Admin extends REST_Controller {
 	 		$id = $this->delete('id');
     		$this->Categories_model->delete_category($id);
         	 
-        	$this->response(array('status' => 'success'));
+        	$this->successResponse();
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
+    		$this->errorResponse($e);
     	}		 	
 	 }	 
 }

@@ -40,7 +40,7 @@ class Categories_model extends CI_Model {
 	
 	        if (!$result){
 				$message = 'No categories found';
-				throw new NSH_ResourceNotFoundException($message);
+				throw new NSH_ResourceNotFoundException(220, $message);
 			}
 			
 			return $result;
@@ -70,13 +70,13 @@ class Categories_model extends CI_Model {
 				$queryForParent = $this->db->get_where(CATEGORIES_TABLE, array('id' => $parentId));
 				if (!$queryForParent->row_array()){
 					$error_message = 'Parent Category does not exist';
-					throw new NSH_ResourceNotFoundException($error_message);
+					throw new NSH_ResourceNotFoundException(220, $error_message);
 				}
 				
 				//ensure that parentId is not equal to id
 				if ($parentId == $id){
 					$error_message = 'Parent CategoryId can not be the same as the CategoryId';
-					throw new NSH_ValidationException($error_message);
+					throw new NSH_ValidationException(110, $error_message);
 				}
 			}			
 			
@@ -87,7 +87,7 @@ class Categories_model extends CI_Model {
 	        {
 	        	if ($existingCategory && $existingCategory['id'] !== $post_data['id']){
 					$error_message = 'The name \''.$name.'\' is already in use';
-					throw new NSH_ValidationException($error_message);
+					throw new NSH_ValidationException(110, $error_message);
 				}
 				
 				$parentId = !empty($parentId) ? $parentId : $existingCategory['parentId'];
@@ -106,7 +106,7 @@ class Categories_model extends CI_Model {
 			if ($existingCategory)
 			{
 				$error_message = 'The name \''.$name.'\' is already in use';
-				throw new NSH_ValidationException($error_message);
+				throw new NSH_ValidationException(110, $error_message);
 			}
 		
 		    $data = array(
@@ -131,7 +131,7 @@ class Categories_model extends CI_Model {
 			
 			if($result === FALSE)
 	        {
-	        	throw new NSH_Exception('failed to delete skillCategory');
+	        	throw new NSH_Exception(100, 'failed to delete skillCategory');
 	        }
 		}
 		

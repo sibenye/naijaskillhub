@@ -26,7 +26,7 @@ class CredentialTypes_model extends CI_Model {
 	
 	        if (!$result){
 				$message = 'No CredentialTypes found';
-				throw new NSH_ResourceNotFoundException($message);
+				throw new NSH_ResourceNotFoundException(220, $message);
 			}
 			
 			return $result;

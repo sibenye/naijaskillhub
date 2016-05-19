@@ -29,7 +29,7 @@ class UserAttributes_model extends CI_Model {
 			
 			if (!$result){
 				$message = 'No UserAttributes found';
-				throw new NSH_ResourceNotFoundException($message);
+				throw new NSH_ResourceNotFoundException(220, $message);
 			}
 			
 			return $result;	        	        
@@ -44,7 +44,7 @@ class UserAttributes_model extends CI_Model {
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array()){
-				throw new NSH_ValidationException($this->form_validation->error_array());
+				throw new NSH_ValidationException(110, $this->form_validation->error_array());
 			}
 		
 			//ensure that the name does not belong to another
@@ -58,7 +58,7 @@ class UserAttributes_model extends CI_Model {
 	        	{
 					//throw or return error
 					$error_message = 'The name \''.$name.'\' is already in use';
-					throw new NSH_ValidationException($error_message);
+					throw new NSH_ValidationException(110, $error_message);
 				}
 	        	$id = $post_data['id'];
 	        	$data = array('name' => $post_data['name']);
@@ -69,7 +69,7 @@ class UserAttributes_model extends CI_Model {
 			{
 				//throw or return error
 				$error_message = 'The name \''.$name.'\' is already in use';
-				throw new NSH_ValidationException($error_message);
+				throw new NSH_ValidationException(110, $error_message);
 			}
 			
 			$this->load->helper('date');
@@ -93,7 +93,7 @@ class UserAttributes_model extends CI_Model {
 			if($result === FALSE)
 	        {
 	        	$message = 'failed to delete userAttribute';
-				throw new NSH_Exception($message);
+				throw new NSH_Exception(100, $message);
 	        }
 		}
 }

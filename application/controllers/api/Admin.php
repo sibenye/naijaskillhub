@@ -37,7 +37,7 @@ class Admin extends REST_Controller {
 	        $userAttributes = $this->UserAttributes_model->get_userAttributes(); 
 			$this->response($userAttributes, 200);
     	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
     	}
     }
     
@@ -50,7 +50,7 @@ class Admin extends REST_Controller {
 	         
 	        $this->response(array('status' => 'success'));
     	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
     	}			
     }
 	
@@ -62,7 +62,7 @@ class Admin extends REST_Controller {
 	         
 	        $this->response(array('status' => 'success'));
     	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
     	}    	
     }
 	
@@ -84,7 +84,7 @@ class Admin extends REST_Controller {
 	        
 	        $this->response($credentialTypes, 200);
     	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
     	}
         
     }
@@ -100,7 +100,7 @@ class Admin extends REST_Controller {
         
         	$this->response($categories, 200); 
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
     	}	
 	 }
 	 
@@ -113,7 +113,7 @@ class Admin extends REST_Controller {
          
         	$this->response(array('status' => 'success'));
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
     	}
 	 	
 	 }
@@ -126,7 +126,7 @@ class Admin extends REST_Controller {
         	 
         	$this->response(array('status' => 'success'));
 	 	} catch (NSH_Exception $e){
-    		$this->response($e->getErrorMessage(), $e->getStatusCode());
+    		$this->response($e->getErrorMessage(), $e->getHttpStatusCode());
     	}		 	
 	 }	 
 }

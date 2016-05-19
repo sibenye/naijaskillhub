@@ -33,7 +33,7 @@ class Portfolios_model extends CI_Model {
 			
 			if (!$results || count($results) == 0 || $results[0] == NULL){
 				$message = 'No portfolios found';
-				throw new NSH_ResourceNotFoundException($message);
+				throw new NSH_ResourceNotFoundException(220, $message);
 			}
 			
 			foreach ($results as $key => $value) {
@@ -57,7 +57,7 @@ class Portfolios_model extends CI_Model {
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
 			if ($this->form_validation->error_array()){
-				throw new NSH_ValidationException($this->form_validation->error_array());
+				throw new NSH_ValidationException(110, $this->form_validation->error_array());
 			}
 
 			//ensure that the category Id exists
@@ -65,7 +65,7 @@ class Portfolios_model extends CI_Model {
 			if(!$existingCategory || empty($existingCategory)){
 				$error_message = "Category does not exist";
 				show_validation_exception($error_message);
-				throw new NSH_ResourceNotFoundException($error_message);
+				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
 			
 			//ensure that the user exists
@@ -73,7 +73,7 @@ class Portfolios_model extends CI_Model {
 			if(!$existingUser || empty($existingUser)){
 				$error_message = "User does not exist";
 				show_validation_exception($error_message);
-				throw new NSH_ResourceNotFoundException($error_message);
+				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
 			
 			//check if user already has a portfolio in this category
@@ -131,7 +131,7 @@ class Portfolios_model extends CI_Model {
 			
 			if($result === FALSE)
 	        {
-				throw new NSH_Exception('failed to delete portfolio');
+				throw new NSH_Exception(100, 'failed to delete portfolio');
 	        }
 		}
 		

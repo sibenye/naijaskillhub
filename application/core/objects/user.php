@@ -4,9 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class user {
     
     public $userId = NULL;
-	public $email = '';
+	public $emailAddress = '';
+	public $username = '';
 	public $isActive = FALSE;
-	public $firstName = '';
-	public $lastName = '';
 	public $credentialTypes = array();
 }

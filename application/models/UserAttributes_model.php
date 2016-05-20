@@ -43,7 +43,7 @@ class UserAttributes_model extends CI_Model {
 			
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
-			if ($this->form_validation->error_array()){
+			if ($this->form_validation->error_array() || empty($post_data)){
 				throw new NSH_ValidationException(110, $this->form_validation->error_array());
 			}
 		

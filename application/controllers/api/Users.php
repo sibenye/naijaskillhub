@@ -15,8 +15,20 @@ class Users extends NSH_Controller {
         parent::__construct();
         $this->load->model('Users_model');
     }
-	
-	function users_post()
+    
+    function users_get()
+    {
+    	try {
+    		$get_data = $this->get();
+    		$user = $this->Users_model->get_user($get_data);
+    		
+    		$this->successResponse($user);
+    	} catch (NSH_Exception $e) {
+    		$this->errorResponse($e);
+    	}
+    }
+    
+    function users_post()
 	{	
 		try {
 			$post_data = $this->post();

@@ -9,6 +9,8 @@ require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
 require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
 require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
 
+use \YaLinqo\Enumerable;
+
 class Users_model extends CI_Model {
 	
 		use NSH_Utils;
@@ -17,6 +19,50 @@ class Users_model extends CI_Model {
         {
                 $this->load->database();
 				$this->load->helper('date');
+        }
+        
+        public function get_user($get_data)
+        {
+        	$result = array();
+        	$searchData = array();
+        	if (!empty($get_data['id']))
+        	{
+        		$searchData['id'] = $get_data['id'];
+        	}
+        	if (!empty($get_data['username']))
+        	{
+        		$searchData['username'] = $get_data['username'];
+        	}
+        	if (!empty($get_data['emailAddress']))
+        	{
+        		$searchData['emailAddress'] = $get_data['emailAddress'];
+        	} 
+        	
+        	if (empty($searchData)) {
+        		$error_message = 'Id, or username, or emailAddress is required';
+        		throw new NSH_ValidationException(110, $error_message);        		
+        	}
+        	
+        	$query = $this->db->get_where(USERS_TABLE, $searchData);
+        	$result = $query->row_array();
+        	
+        	if (empty($result))
+        	{
+        		$error_message = 'User does not exist';
+        		throw new NSH_ResourceNotFoundException(220, $error_message);
+        	}
+        	
+        	$user = new User();
+        	$user->userId = $result['id'];
+        	$user->emailAddress = $result['emailAddress'];
+        	$user->username = $result['username'];
+        	$user->isActive = ($result['isActive'] == 1);
+        	
+        	$this->getCredentialTypes($user);
+        	
+        	$this->getAttributes($user);
+        	
+        	return $user;
         }
 		
 		public function create_user($post_data)
@@ -259,6 +305,40 @@ class Users_model extends CI_Model {
 			$existingUser = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
 			
 			return ($existingUser && !empty($existingUser));
+		}
+		
+		private function getCredentialTypes($user)
+		{
+			$credentialTypes = array();
+			$userCredentialsQueryResults = $this->db->get_where(USERCREDENTIALS_TABLE, array('userId' => $user->userId))->result_array();
+			
+			foreach ($userCredentialsQueryResults as $key => $value) {
+				$credentialTypeId = $userCredentialsQueryResults[$key]['credentialTypeId'];
+				
+				$credentialTypeResult = $this->db->get_where(CREDENTIALTYPES_TABLE, array('id' => $credentialTypeId))->row_array();
+				
+				$credentialTypes[$key] = $credentialTypeResult['name'];
+			}
+			
+			$user->credentialTypes = $credentialTypes;
+		}
+		
+		private function getAttributes($user)
+		{
+			$userId = $user->userId;
+			$userAttributes = $this->db->get(USERATTRIBUTES_TABLE)->result_array();
+			$userAttributeValues = $this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userId' => $userId))->result_array();
+			
+			$attributes = null;
+			
+			foreach ($userAttributeValues as $userAttributeValue) {
+				$name = Enumerable::from($userAttributes)->where('$userAttr ==> $userAttr["id"] == $userAttributeValue["userAttributeId"]')['name'];
+				$attributeValue = $userAttributeValue['attributeValue'];
+				$attributes[$name] = $attributeValue;
+			}
+			
+			$user->attributes = $attributes;
+			
 		}
 }
 	

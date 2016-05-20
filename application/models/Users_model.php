@@ -64,6 +64,28 @@ class Users_model extends CI_Model {
         	
         	return $user;
         }
+        
+        public function get_userAttributes($userId)
+        {
+        	$result = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
+        		
+        	if (empty($result)){
+        		$error_message = 'User does not exist';
+        		throw new NSH_ResourceNotFoundException(220, $error_message);
+        	}
+        		
+        	$user = new User();
+        	$user->id = $result['id'];
+        	$user->emailAddress = $result['emailAddress'];
+        	$user->username = $result['username'];
+        	$user->isActive = ($result['isActive'] == 1);
+        	
+        	$this->getAttributes($user);
+        	
+        	$userAttributes = $user->attributes;
+        	
+        	return $userAttributes;
+        }
 		
 		public function save_user($post_data)
 		{
@@ -85,7 +107,7 @@ class Users_model extends CI_Model {
 			$this->save_userCredential($post_data, $user);			
 			
 			if (array_key_exists('attributes', $post_data)){
-				$this->save_userAttributes($post_data['attributes'], $user);
+				$this->upsert_userAttributes($post_data['attributes'], $user);
 			}			
 			
 			return $user;
@@ -169,7 +191,30 @@ class Users_model extends CI_Model {
 				
 		}
 		
-		private function save_userAttributes($attributes, $user)
+		public function save_userAttributes($post_data)
+		{
+			$userId = $post_data['id'];
+			$result = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
+			
+			if (empty($result)){
+				$error_message = 'User does not exist';
+				throw new NSH_ResourceNotFoundException(220, $error_message);
+			}
+			
+			$user = new User();
+			$user->id = $result['id'];
+			$user->emailAddress = $result['emailAddress'];
+			$user->username = $result['username'];
+			$user->isActive = ($result['isActive'] == 1);
+			
+			unset($post_data['id']);
+			
+			$this->validateAttributes($post_data);
+			
+			$this->upsert_userAttributes($post_data, $user);
+		}
+		
+		private function upsert_userAttributes($attributes, $user)
 		{
 			$userId = $user->id;
 			$modifiedDate = mdate(DATE_TIME_STRING, time());

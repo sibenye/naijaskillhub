@@ -28,6 +28,17 @@ class Users extends NSH_Controller {
     	}
     }
     
+    function attributes_get()
+    {
+    	try {
+    		$userAttributes = $this->Users_model->get_userAttributes($this->get('id'));
+    	
+    		$this->successResponse($userAttributes);
+    	} catch (NSH_Exception $e) {
+    		$this->errorResponse($e);
+    	}
+    }
+    
     function users_post()
 	{	
 		try {
@@ -39,6 +50,24 @@ class Users extends NSH_Controller {
 		} catch (NSH_Exception $e){
     		$this->errorResponse($e);
     	}		
+	}
+	
+	function attributes_post()
+	{
+		try {
+			$post_data = $this->post();
+			
+			if (!array_key_exists('id', $post_data)){
+				//if the user id is not in the post body get it from the request url
+				$post_data['id'] = $this->get('id');
+			}
+				
+			$this->Users_model->save_userAttributes($post_data);
+			 
+			$this->successResponse();
+		} catch (NSH_Exception $e){
+			$this->errorResponse($e);
+		}
 	}
 	
 	function changeEmailAddress_post()

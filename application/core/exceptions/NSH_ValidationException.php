@@ -6,7 +6,7 @@ class NSH_ValidationException extends NSH_Exception {
 		
 	function __construct($errorCode, $errorDetail = '')
     {
-        parent::__construct($errorCode, json_encode($errorDetail), 400);		
+        parent::__construct($errorCode, $errorDetail, 400);		
 	}	
 }
 	

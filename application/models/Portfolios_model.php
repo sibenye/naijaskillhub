@@ -56,7 +56,7 @@ class Portfolios_model extends CI_Model {
 			
 			$this->load->library('form_validation', $rules);
 			$this->form_validation->validate($post_data);
-			if ($this->form_validation->error_array()){
+			if ($this->form_validation->error_array() || empty($post_data)){
 				throw new NSH_ValidationException(110, $this->form_validation->error_array());
 			}
 
@@ -64,7 +64,6 @@ class Portfolios_model extends CI_Model {
 			$existingCategory = $this->db->get_where(CATEGORIES_TABLE, array('id' => $post_data['categoryId']))->row_array();
 			if(!$existingCategory || empty($existingCategory)){
 				$error_message = "Category does not exist";
-				show_validation_exception($error_message);
 				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
 			
@@ -72,7 +71,6 @@ class Portfolios_model extends CI_Model {
 			$existingUser = $this->db->get_where(USERS_TABLE, array('id' => $post_data['userId']))->row_array();
 			if(!$existingUser || empty($existingUser)){
 				$error_message = "User does not exist";
-				show_validation_exception($error_message);
 				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
 			

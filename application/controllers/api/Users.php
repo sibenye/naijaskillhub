@@ -21,12 +21,46 @@ class Users extends NSH_Controller {
 		try {
 			$post_data = $this->post();
 			
-    		$this->Users_model->create_user($post_data);
+    		$userObject = $this->Users_model->create_user($post_data);
      
-    		$this->successResponse();
+    		$this->successResponse($userObject);
 		} catch (NSH_Exception $e){
     		$this->errorResponse($e);
     	}		
+	}
+	
+	function changeEmailAddress_post()
+	{
+		try {
+			$post_data = $this->post();
+		if (!array_key_exists('id', $post_data)){
+				//if the user id is not in the post body get it from the request url
+				$post_data['id'] = $this->get('id');
+			}
+				
+			$this->Users_model->update_emailAddress($post_data);
+			 
+			$this->successResponse();
+		} catch (NSH_Exception $e){
+			$this->errorResponse($e);
+		}
+	}
+	
+	function changeUsername_post()
+	{
+		try {
+			$post_data = $this->post();
+			if (!array_key_exists('id', $post_data)){
+				//if the user id is not in the post body get it from the request url
+				$post_data['id'] = $this->get('id');
+			}
+	
+			$this->Users_model->update_userName($post_data);
+	
+			$this->successResponse();
+		} catch (NSH_Exception $e){
+			$this->errorResponse($e);
+		}
 	}
 }
 	

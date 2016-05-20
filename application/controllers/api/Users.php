@@ -33,7 +33,7 @@ class Users extends NSH_Controller {
 		try {
 			$post_data = $this->post();
 			
-    		$userObject = $this->Users_model->create_user($post_data);
+    		$userObject = $this->Users_model->save_user($post_data);
      
     		$this->successResponse($userObject);
 		} catch (NSH_Exception $e){

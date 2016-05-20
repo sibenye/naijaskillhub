@@ -53,7 +53,7 @@ class Users_model extends CI_Model {
         	}
         	
         	$user = new User();
-        	$user->userId = $result['id'];
+        	$user->id = $result['id'];
         	$user->emailAddress = $result['emailAddress'];
         	$user->username = $result['username'];
         	$user->isActive = ($result['isActive'] == 1);
@@ -65,44 +65,28 @@ class Users_model extends CI_Model {
         	return $user;
         }
 		
-		public function create_user($post_data)
+		public function save_user($post_data)
 		{
+			$isNewUserCreation = (!array_key_exists('id', $post_data) || empty($post_data['id']));
+			if ($isNewUserCreation
+					&& !array_key_exists('credentialType', $post_data))
+			{
+				//default to STANDARD credentialType
+				$post_data['credentialType'] = STANDARD_CREDENTIALTYPE;
+			}
+			
 			//validate post data
-			$this->validation = new Users_creation_validation();
-			$rules = $this->validation->validation_rules;
+			$this->validateUserPostData($post_data);
 			
-			$this->load->library('form_validation', $rules);
-			$this->form_validation->validate($post_data);
-			if ($this->form_validation->error_array() || empty($post_data))
-			{				
-				throw new NSH_ValidationException(110, $this->form_validation->error_array());
-			}
-			
-			if (!$this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
-					&& !$this->equalIgnorecase($post_data['credentialType'], FACEBOOK_CREDENTIALTYPE)
-					&& !$this->equalIgnorecase($post_data['credentialType'], GOOGLE_CREDENTIALTYPE))
-			{
-				$error_message = 'CredentialType should be either STANDARD, FACEBOOK or GOOGLE';
-				throw new NSH_ValidationException(110, $error_message);
-			}
-			
-			if ($this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
-					&& (!array_key_exists('password', $post_data) || empty($post_data['password'])))
-			{
-				$error_message = 'Password is required for STANDARD crendentialType';
-				throw new NSH_ValidationException(110, $error_message);
-			}
-			
-			if (!$this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
-					&& (!array_key_exists('socialId', $post_data) || empty($post_data['socialId'])))
-			{
-				$error_message = 'SocialId is required for FACEBOOK or GOOGLE crendentialType';
-				throw new NSH_ValidationException(110, $error_message);
-			}
-			
-			$user = $this->insert_user($post_data);
+			$user = $this->upsert_user($post_data);
 			//insert credential
-			$this->save_userCredential($post_data, $user);
+			//Note that credentials will only be inserted if the user does not have that credentialType
+			//If the user already has that credentialType it will do nothing.
+			$this->save_userCredential($post_data, $user);			
+			
+			if (array_key_exists('attributes', $post_data)){
+				$this->save_userAttributes($post_data['attributes'], $user);
+			}			
 			
 			return $user;
 		}
@@ -185,9 +169,45 @@ class Users_model extends CI_Model {
 				
 		}
 		
+		private function save_userAttributes($attributes, $user)
+		{
+			$userId = $user->id;
+			$modifiedDate = mdate(DATE_TIME_STRING, time());
+			
+			$savedAttributes = array();
+			if (empty($attributes))
+			{
+				$this->getAttributes($user);
+				return;
+			}
+			
+			foreach ($attributes as $key => $value) {
+				$attributeId = $this->db->get_where(USERATTRIBUTES_TABLE, array('name' => $key))->row_array()['id'];
+				if (!empty($this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userAttributeId' => $attributeId, 'userId' => $userId))->row_array()))
+				{
+					$data = array('attributeValue' => $value, 'modifiedDate' => $modifiedDate);
+					$this->db->update(USERATTRIBUTEVALUES_TABLE, $data, array('userAttributeId' => $attributeId, 'userId' => $userId));
+				}
+				else {
+					$data = array('attributeValue' => $value, 'userAttributeId' => $attributeId, 'userId' => $userId, 'createdDate' => $modifiedDate, 'modifiedDate' => $modifiedDate);
+					$this->db->insert(USERATTRIBUTEVALUES_TABLE, $data);
+				}
+			}
+			
+			$this->getAttributes($user);
+		}
+		
 		private function save_userCredential($post_data, $user)
 		{
-			$userId = $user->userId;
+			$userId = $user->id;
+			$credentialTypes = $this->db->get(CREDENTIALTYPES_TABLE)->result_array();
+			
+			if (empty($post_data['credentialType']))
+			{				
+				$this->getCredentialTypes($user);
+				return;
+			}
+			
 			$this->db->select('id,name');
 			
 			$credentialTypeResult = $this->db->get_where(CREDENTIALTYPES_TABLE,
@@ -209,7 +229,7 @@ class Users_model extends CI_Model {
 				'modifiedDate' => $nowDate
 		    	);
 				
-				if (STANDARD_CREDENTIALTYPE == $post_data['credentialType'])
+				if ($this->equalIgnorecase(STANDARD_CREDENTIALTYPE, $post_data['credentialType']))
 				{
 					$data['password'] = $post_data['password'];
 				}
@@ -221,49 +241,84 @@ class Users_model extends CI_Model {
 			    $this->db->insert(USERCREDENTIALS_TABLE, $data);
 			}
 			
-			$user->credentialTypes = array($credentialTypeName);			
+			$this->getCredentialTypes($user);			
 		}
 		
-		private function insert_user($post_data)
+		private function upsert_user($post_data)
 		{
-			//ensure that the email address is not in use
-			$emailInUse = $this->userEmailInUse($post_data['emailAddress']);
-			
-			if ($emailInUse)
+			$userId = null;
+			if (array_key_exists('id', $post_data)
+					&& !empty($post_data['id']))
 			{
-				//return error that emailAddress is already in use
-				throw new NSH_ValidationException(112);
-			}			
-
-			//ensure that the username/socialId is not in use
-			if ($this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
-					&& $this->userNameInUse($post_data['username'])){
-				//return error that this username is not available
-				throw new NSH_ValidationException(111);
+				$userId = $post_data['id'];
+				
+				if (!$this->userExists($userId)){
+					$error_message = 'User does not exist';
+					throw new NSH_ResourceNotFoundException(220, $error_message);
+				}				
 			}
 			
-			$nowDate = mdate(DATE_TIME_STRING, time());
+			$modifiedDate = mdate(DATE_TIME_STRING, time());			
+			$data = array();
+			//ensure that the email address is not in use
+			if (array_key_exists('emailAddress', $post_data) 
+					&& !empty($post_data['emailAddress']))
+			{
+				$emailInUse = $this->userEmailInUse($post_data['emailAddress'], $userId);
+					
+				if ($emailInUse)
+				{
+					//return error that emailAddress is already in use
+					throw new NSH_ValidationException(112);
+				}
+				
+				$data['emailAddress'] = $post_data['emailAddress'];
+			}					
+
+			//ensure that the username is not in use
+			if (array_key_exists('username', $post_data)
+					&& !empty($post_data['username']))
+			{
+				if (array_key_exists('credentialType', $post_data)
+						&& $this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)){
+					
+						if ($this->userNameInUse($post_data['username'], $userId))
+						{
+							//return error that this username is not available
+							throw new NSH_ValidationException(111);
+						}
+						
+						$data['username'] = $post_data['username'];							
+				}
+			}
 			
-			$data = array(
-				'emailAddress' => $post_data['emailAddress'],
-		        'username' => $post_data['username'],
-		        'createdDate' => $nowDate,
-				'modifiedDate' => $nowDate
-		    );
-			
-			$this->db->insert(USERS_TABLE, $data);
-			//retrieve the just created user
-			$userQueryResult = $this->db->get_where(USERS_TABLE, array('emailAddress' => $post_data['emailAddress']))->row_array();
+			$userQueryResult = array();
+			if (!empty($userId))
+			{				
+				$data['modifiedDate'] = $modifiedDate;
+				$this->db->update(USERS_TABLE, $data, array('id' => $userId));
+				//retrieve the updated user
+				$userQueryResult = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
+			}
+			else 
+			{
+				$data['modifiedDate'] = $modifiedDate;
+				$data['createdDate'] = $modifiedDate;
+				
+				$this->db->insert(USERS_TABLE, $data);
+				//retrieve the just created user
+				$userQueryResult = $this->db->get_where(USERS_TABLE, array('emailAddress' => $post_data['emailAddress']))->row_array();
+			}
 			
 			$user = new User();
-			$user->userId = $userQueryResult['id'];
+			$user->id = $userQueryResult['id'];
 			$user->emailAddress = $userQueryResult['emailAddress'];
 			$user->username = $userQueryResult['username'];
 			$user->isActive = ($userQueryResult['isActive'] == 1);
 			
 			return $user;		
 		}
-		
+				
 		private function userEmailInUse($email, $userId = NULL)
 		{
 			$query = $this->db->get_where(USERS_TABLE, array('emailAddress' => $email));
@@ -307,37 +362,108 @@ class Users_model extends CI_Model {
 			return ($existingUser && !empty($existingUser));
 		}
 		
-		private function getCredentialTypes($user)
-		{
-			$credentialTypes = array();
-			$userCredentialsQueryResults = $this->db->get_where(USERCREDENTIALS_TABLE, array('userId' => $user->userId))->result_array();
-			
-			foreach ($userCredentialsQueryResults as $key => $value) {
-				$credentialTypeId = $userCredentialsQueryResults[$key]['credentialTypeId'];
-				
-				$credentialTypeResult = $this->db->get_where(CREDENTIALTYPES_TABLE, array('id' => $credentialTypeId))->row_array();
-				
-				$credentialTypes[$key] = $credentialTypeResult['name'];
-			}
-			
-			$user->credentialTypes = $credentialTypes;
-		}
-		
 		private function getAttributes($user)
 		{
-			$userId = $user->userId;
-			$userAttributes = $this->db->get(USERATTRIBUTES_TABLE)->result_array();
-			$userAttributeValues = $this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userId' => $userId))->result_array();
+			$userId = $user->id;
 			
 			$attributes = null;
 			
-			foreach ($userAttributeValues as $userAttributeValue) {
-				$name = Enumerable::from($userAttributes)->where('$userAttr ==> $userAttr["id"] == $userAttributeValue["userAttributeId"]')['name'];
-				$attributeValue = $userAttributeValue['attributeValue'];
-				$attributes[$name] = $attributeValue;
+			$this->db->select(USERATTRIBUTEVALUES_TABLE.'.attributeValue,'.USERATTRIBUTES_TABLE.'.name');
+			$this->db->from(USERATTRIBUTEVALUES_TABLE);
+			$this->db->join(USERATTRIBUTES_TABLE, USERATTRIBUTES_TABLE.'.id = '.USERATTRIBUTEVALUES_TABLE.'.userAttributeId');
+			$this->db->where('userId', $userId);
+			$userAttributes = $this->db->get()->result_array();
+			
+			foreach ($userAttributes as $userAttribute) {
+				$attributes[$userAttribute['name']] = $userAttribute['attributeValue'];
+			}
+			$user->attributes = $attributes;			
+		}
+		
+		private function getCredentialTypes($user)
+		{
+			$userId = $user->id;
+			$this->db->select('credentialTypes.name');
+			$this->db->from(USERCREDENTIALS_TABLE);
+			$this->db->join(CREDENTIALTYPES_TABLE, CREDENTIALTYPES_TABLE.'.id = '.USERCREDENTIALS_TABLE.'.credentialTypeId');
+			$this->db->where('userId', $userId);
+			$userCredentialTypes = $this->db->get()->result_array();
+			if (!empty($userCredentialTypes)){
+					
+				$userCredentialTypes = Enumerable::from($userCredentialTypes)->select('$credType ==> $credType["name"]')->toArray();
+			}
+			$user->credentialTypes = $userCredentialTypes;
+		}
+		
+		private function validateAttributes($attributes)
+		{
+			if (empty($attributes))
+			{
+				return;
 			}
 			
-			$user->attributes = $attributes;
+			$invalidAttributes = array();
+			
+			$i = 0;			
+			foreach ($attributes as $key => $value) {
+				if (empty($this->db->get_where(USERATTRIBUTES_TABLE, array('name' => $key))->row_array())){
+					$invalidAttributes[$i] = $key;
+					++$i;
+				}
+			}
+			
+			if (!empty($invalidAttributes)){
+				throw new NSH_ValidationException(120, $invalidAttributes);
+			}
+		}
+		
+		private function validateUserPostData($post_data)
+		{
+			$isNewUserCreation = (!array_key_exists('id', $post_data) || empty($post_data['id']));
+			if ($isNewUserCreation 
+					&& (!array_key_exists('emailAddress', $post_data) || empty($post_data['emailAddress'])))
+			{
+				$error_message = 'EmailAddress is required for new User creation';
+				throw new NSH_ValidationException(110, $error_message);
+				
+			}
+			
+			if ($isNewUserCreation
+					&& (!array_key_exists('username', $post_data) || empty($post_data['username'])))
+			{
+				$error_message = 'username is required for new User creation';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			if (array_key_exists('credentialType', $post_data))
+			{
+				if (!$this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
+						&& !$this->equalIgnorecase($post_data['credentialType'], FACEBOOK_CREDENTIALTYPE)
+						&& !$this->equalIgnorecase($post_data['credentialType'], GOOGLE_CREDENTIALTYPE))
+				{
+					$error_message = 'CredentialType should be either STANDARD, FACEBOOK or GOOGLE';
+					throw new NSH_ValidationException(110, $error_message);
+				}
+				
+				if ($this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
+						&& (!array_key_exists('password', $post_data) || empty($post_data['password'])))
+				{
+					$error_message = 'password is required for STANDARD crendentialType';
+					throw new NSH_ValidationException(110, $error_message);
+				}
+				
+				if (!$this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
+						&& (!array_key_exists('socialId', $post_data) || empty($post_data['socialId'])))
+				{
+					$error_message = 'SocialId is required for FACEBOOK or GOOGLE crendentialType';
+					throw new NSH_ValidationException(110, $error_message);
+				}
+			}
+			
+			if (array_key_exists('attributes', $post_data))
+			{
+				$this->validateAttributes($post_data['attributes']);
+			}
 			
 		}
 }

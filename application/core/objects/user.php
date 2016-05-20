@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class user {
     
-    public $userId = NULL;
+    public $id = NULL;
 	public $emailAddress = '';
 	public $username = '';
 	public $isActive = FALSE;

@@ -290,7 +290,7 @@ class Users_model extends CI_Model {
 			if ($isNewUserCreation 
 					&& (!array_key_exists('emailAddress', $post_data) || empty($post_data['emailAddress'])))
 			{
-				$error_message = 'EmailAddress is required for new User creation';
+				$error_message = 'emailAddress is required for new User creation';
 				throw new NSH_ValidationException(110, $error_message);
 				
 			}
@@ -308,7 +308,7 @@ class Users_model extends CI_Model {
 						&& !$this->equalIgnorecase($post_data['credentialType'], FACEBOOK_CREDENTIALTYPE)
 						&& !$this->equalIgnorecase($post_data['credentialType'], GOOGLE_CREDENTIALTYPE))
 				{
-					$error_message = 'CredentialType should be either STANDARD, FACEBOOK or GOOGLE';
+					$error_message = 'credentialType should be either STANDARD, FACEBOOK or GOOGLE';
 					throw new NSH_ValidationException(110, $error_message);
 				}
 				

@@ -15,6 +15,7 @@ class Users extends NSH_Controller {
         parent::__construct();
         $this->load->model('Users_model');
 		$this->load->model('UserAttributeValues_model');
+		$this->load->model('UserCredentials_model');
     }
     
     function users_get()
@@ -71,6 +72,24 @@ class Users extends NSH_Controller {
 		}
 	}
 	
+	function credentials_post()
+	{
+		try {
+			$post_data = $this->post();
+				
+			if (!array_key_exists('id', $post_data)){
+				//if the user id is not in the post body get it from the request url
+				$post_data['id'] = $this->get('id');
+			}
+		
+			$this->UserCredentials_model->add_userCredential($post_data);
+		
+			$this->successResponse();
+		} catch (NSH_Exception $e){
+			$this->errorResponse($e);
+		}
+	}
+	
 	function changeEmailAddress_post()
 	{
 		try {
@@ -98,6 +117,23 @@ class Users extends NSH_Controller {
 			}
 	
 			$this->Users_model->update_userName($post_data);
+	
+			$this->successResponse();
+		} catch (NSH_Exception $e){
+			$this->errorResponse($e);
+		}
+	}
+	
+	function credentials_delete()
+	{
+		try {
+			$delete_data = $this->query();
+			if (!array_key_exists('id', $delete_data)){
+				//if the user id is not in the post body get it from the request url
+				$delete_data['id'] = $this->get('id');
+			}
+	
+			$this->UserCredentials_model->delete_userCredential($delete_data);
 	
 			$this->successResponse();
 		} catch (NSH_Exception $e){

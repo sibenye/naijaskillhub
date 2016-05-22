@@ -11,6 +11,7 @@ class errorCodes {
 			110 => 'Validation Error',
 			111 => 'This username is not available',
 			112 => 'This emailAddress is already in use',
+			113 => 'Password does not meet criteria',
 			120 => 'Invalid User attribute',
 			220 => 'Object Not Found'
 		);	

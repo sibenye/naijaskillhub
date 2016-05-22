@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 require_once(APPPATH.'/core/utilities/NSH_Utils.php');
 require_once(APPPATH.'/core/validations/Users_creation_validation.php');
+require_once(APPPATH.'/core/validations/Password_validation.php');
 require_once(APPPATH.'/core/objects/user.php');
 
 require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
@@ -323,6 +324,12 @@ class Users_model extends CI_Model {
 				{
 					$error_message = 'SocialId is required for FACEBOOK or GOOGLE crendentialType';
 					throw new NSH_ValidationException(110, $error_message);
+				}
+				
+				if (array_key_exists('password', $post_data) && !empty($post_data['password']))
+				{
+					//check password meets criteria
+					Password_validation::validate($post_data['password']);
 				}
 			}
 			

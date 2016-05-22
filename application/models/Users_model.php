@@ -1,15 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-require (APPPATH.'/core/utilities/NSH_Utils.php');
-require(APPPATH.'/core/validations/Users_creation_validation.php');
-require(APPPATH.'/core/objects/user.php');
+require_once(APPPATH.'/core/utilities/NSH_Utils.php');
+require_once(APPPATH.'/core/validations/Users_creation_validation.php');
+require_once(APPPATH.'/core/objects/user.php');
 
 require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
 require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
 require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
-
-use \YaLinqo\Enumerable;
 
 class Users_model extends CI_Model {
 	
@@ -19,6 +17,7 @@ class Users_model extends CI_Model {
         {
                 $this->load->database();
 				$this->load->helper('date');
+				$this->load->model('UserCredentials_model');
         }
         
         public function get_user($get_data)
@@ -58,7 +57,7 @@ class Users_model extends CI_Model {
         	$user->username = $result['username'];
         	$user->isActive = ($result['isActive'] == 1);
         	
-        	$this->getCredentialTypes($user);
+        	$user->credentialTypes = $this->UserCredentials_model->getCredentialTypes($user->id);
         	
         	$this->getAttributes($user);
         	
@@ -104,7 +103,7 @@ class Users_model extends CI_Model {
 			//insert credential
 			//Note that credentials will only be inserted if the user does not have that credentialType
 			//If the user already has that credentialType it will do nothing.
-			$this->save_userCredential($post_data, $user);			
+			$user->credentialTypes = $this->UserCredentials_model->save_userCredential($post_data, $user->id);			
 			
 			if (array_key_exists('attributes', $post_data)){
 				$this->upsert_userAttributes($post_data['attributes'], $user);
@@ -242,53 +241,6 @@ class Users_model extends CI_Model {
 			$this->getAttributes($user);
 		}
 		
-		private function save_userCredential($post_data, $user)
-		{
-			$userId = $user->id;
-			$credentialTypes = $this->db->get(CREDENTIALTYPES_TABLE)->result_array();
-			
-			if (empty($post_data['credentialType']))
-			{				
-				$this->getCredentialTypes($user);
-				return;
-			}
-			
-			$this->db->select('id,name');
-			
-			$credentialTypeResult = $this->db->get_where(CREDENTIALTYPES_TABLE,
-			 array('name' => $post_data['credentialType']))->row_array();
-			 
-			$credentialTypeId = $credentialTypeResult['id'];
-			$credentialTypeName = $credentialTypeResult['name'];
-			
-			$userCredentialsQueryResult = $this->db->get_where(USERCREDENTIALS_TABLE,
-			 array('userId' => $userId, 'credentialTypeId' => $credentialTypeId))->row_array();
-						
-			if (empty($userCredentialsQueryResult))
-			{
-				$nowDate = mdate(DATE_TIME_STRING, time());
-				$data = array(
-				'userId' => $userId,
-		        'credentialTypeId' => $credentialTypeId,
-		        'createdDate' => $nowDate,
-				'modifiedDate' => $nowDate
-		    	);
-				
-				if ($this->equalIgnorecase(STANDARD_CREDENTIALTYPE, $post_data['credentialType']))
-				{
-					$data['password'] = $post_data['password'];
-				}
-				else
-				{
-					$data['socialId'] = $post_data['socialId'];
-				}
-			
-			    $this->db->insert(USERCREDENTIALS_TABLE, $data);
-			}
-			
-			$this->getCredentialTypes($user);			
-		}
-		
 		private function upsert_user($post_data)
 		{
 			$userId = null;
@@ -324,17 +276,13 @@ class Users_model extends CI_Model {
 			if (array_key_exists('username', $post_data)
 					&& !empty($post_data['username']))
 			{
-				if (array_key_exists('credentialType', $post_data)
-						&& $this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)){
-					
-						if ($this->userNameInUse($post_data['username'], $userId))
-						{
-							//return error that this username is not available
-							throw new NSH_ValidationException(111);
-						}
-						
-						$data['username'] = $post_data['username'];							
+				if ($this->userNameInUse($post_data['username'], $userId))
+				{
+					//return error that this username is not available
+					throw new NSH_ValidationException(111);
 				}
+				
+				$data['username'] = $post_data['username'];
 			}
 			
 			$userQueryResult = array();
@@ -423,21 +371,6 @@ class Users_model extends CI_Model {
 				$attributes[$userAttribute['name']] = $userAttribute['attributeValue'];
 			}
 			$user->attributes = $attributes;			
-		}
-		
-		private function getCredentialTypes($user)
-		{
-			$userId = $user->id;
-			$this->db->select('credentialTypes.name');
-			$this->db->from(USERCREDENTIALS_TABLE);
-			$this->db->join(CREDENTIALTYPES_TABLE, CREDENTIALTYPES_TABLE.'.id = '.USERCREDENTIALS_TABLE.'.credentialTypeId');
-			$this->db->where('userId', $userId);
-			$userCredentialTypes = $this->db->get()->result_array();
-			if (!empty($userCredentialTypes)){
-					
-				$userCredentialTypes = Enumerable::from($userCredentialTypes)->select('$credType ==> $credType["name"]')->toArray();
-			}
-			$user->credentialTypes = $userCredentialTypes;
 		}
 		
 		private function validateAttributes($attributes)

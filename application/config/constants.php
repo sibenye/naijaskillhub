@@ -105,7 +105,8 @@ define ( 'PORTFOLIOS_IMAGES_LINK_TABLE', 'portfolios_images_link' );
 define ( 'PORTFOLIOS_VIDEOS_LINK_TABLE', 'portfolios_videos_link' );
 define ( 'USERATTRIBUTES_TABLE', 'userattributes' );
 define ( 'USERATTRIBUTEVALUES_TABLE', 'userattributevalues' );
-define ( 'USERCREDENTIALS_TABLE', 'usercredentials' );
+define ( 'USERSTANDARDCREDENTIALS_TABLE', 'userstandardcredentials' );
+define ( 'USERGENERICCREDENTIALS_TABLE', 'usergenericcredentials' );
 define ( 'USERS_TABLE', 'users' );
 
 // Url Constants

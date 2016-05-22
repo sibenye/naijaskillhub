@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-require(APPPATH.'/core/validations/Portfolios_validation.php');
+require_once(APPPATH.'/core/validations/Portfolios_validation.php');
 require_once(APPPATH.'/core/exceptions/NSH_Exception.php');
 require_once(APPPATH.'/core/exceptions/NSH_ResourceNotFoundException.php');
 require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');

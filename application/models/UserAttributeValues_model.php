@@ -12,57 +12,105 @@ class UserAttributeValues_model extends CI_Model {
                 $this->load->database();
         }
 		
-		public function get_userAttributeValues($userId = NULL, $attributeId = NULL)
+		public function get_userAttributeValues($userId)
 		{
-			$result = NULL;
-			if (!empty($userId) && empty($attributeId)){
-				$query = $this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userId' => $userId));
-	        	$result = $query->result_array();
-			}elseif (empty($userId) && !empty($attributeId)){
-				$query = $this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('attributeId' => $attributeId));
-	        	$result = $query->result_array();
-			}elseif (!empty($userId) && !empty($attributeId)){
-				$query = $this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userId' => $userId, 'attributeId' => $attributeId));
-	        	$result = $query->row_array();
+			$result = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
+		
+			if (empty($result)){
+				$error_message = 'User does not exist';
+				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
-			
-			if (!$result){
-				$message = 'No userAttributeValues found';
-				throw new NSH_ResourceNotFoundException(220, $message);
+		
+			$userAttributes = $this->getAttributes($userId);
+			 
+			return $userAttributes;
+		}
+		
+		public function getAttributes($userId)
+		{
+			$attributes = null;
+		
+			$this->db->select(USERATTRIBUTEVALUES_TABLE.'.attributeValue,'.USERATTRIBUTES_TABLE.'.name');
+			$this->db->from(USERATTRIBUTEVALUES_TABLE);
+			$this->db->join(USERATTRIBUTES_TABLE, USERATTRIBUTES_TABLE.'.id = '.USERATTRIBUTEVALUES_TABLE.'.userAttributeId');
+			$this->db->where('userId', $userId);
+			$userAttributes = $this->db->get()->result_array();
+		
+			foreach ($userAttributes as $userAttribute) {
+				$attributes[$userAttribute['name']] = $userAttribute['attributeValue'];
 			}
-			return $result;
-		        
+			return $attributes;
 		}
 		
-		public function insert_userAttributeValue($post_data)
+		public function save_userAttributes($post_data)
 		{
-			$data = array(
-		        'userAttributeId' => $post_data['userAttributeId'],
-		        'userId' => $post_data['userId'],
-		        'attributeValue' => $post_data['attributeValue'],
-		    );
-		
-		    return $this->db->insert(USERATTRIBUTEVALUES_TABLE, $data);
+			$userId = $post_data['id'];
+			$result = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
+				
+			if (empty($result)){
+				$error_message = 'User does not exist';
+				throw new NSH_ResourceNotFoundException(220, $error_message);
+			}
+				
+			$user = new User();
+			$user->id = $result['id'];
+			$user->emailAddress = $result['emailAddress'];
+			$user->username = $result['username'];
+			$user->isActive = ($result['isActive'] == 1);
+				
+			unset($post_data['id']);
+				
+			$this->validateAttributes($post_data);
+				
+			return $this->upsert_userAttributes($post_data, $userId);
 		}
 		
-		public function update_userAttributeValue($post_data)
+		public function upsert_userAttributes($attributes, $userId)
 		{
-			$data = array(
-		        'attributeValue' => $post_data['attributeValue'],
-		    );
-		
-		    return $this->db->update(USERATTRIBUTEVALUES_TABLE, $data, array('attributeId' => $post_data['userAttributeId'], 'userId' => $post_data['userId']));
+			$modifiedDate = mdate(DATE_TIME_STRING, time());
+				
+			$savedAttributes = array();
+			if (empty($attributes))
+			{
+				return $this->getAttributes($userId);
+			}
+				
+			foreach ($attributes as $key => $value) {
+				$attributeId = $this->db->get_where(USERATTRIBUTES_TABLE, array('name' => $key))->row_array()['id'];
+				if (!empty($this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userAttributeId' => $attributeId, 'userId' => $userId))->row_array()))
+				{
+					$data = array('attributeValue' => $value, 'modifiedDate' => $modifiedDate);
+					$this->db->update(USERATTRIBUTEVALUES_TABLE, $data, array('userAttributeId' => $attributeId, 'userId' => $userId));
+				}
+				else {
+					$data = array('attributeValue' => $value, 'userAttributeId' => $attributeId, 'userId' => $userId, 'createdDate' => $modifiedDate, 'modifiedDate' => $modifiedDate);
+					$this->db->insert(USERATTRIBUTEVALUES_TABLE, $data);
+				}
+			}
+				
+			return $this->getAttributes($userId);
 		}
 		
-		public function delete_userAttributeValue($attributeId, $userId)
-		{		
-		    $result = $this->db->delete(USERATTRIBUTEVALUES_TABLE, array('attributeId' => $attributeId, 'userId' => $userId));
-			
-			if($result === FALSE)
-	        {
-	        	$message = 'failed to delete userAttributeValue';
-				throw new NSH_Exception(100, $message);
-	        }
-		}		
+		public function validateAttributes($attributes)
+		{
+			if (empty($attributes))
+			{
+				return;
+			}
+				
+			$invalidAttributes = array();
+				
+			$i = 0;
+			foreach ($attributes as $key => $value) {
+				if (empty($this->db->get_where(USERATTRIBUTES_TABLE, array('name' => $key))->row_array())){
+					$invalidAttributes[$i] = $key;
+					++$i;
+				}
+			}
+				
+			if (!empty($invalidAttributes)){
+				throw new NSH_ValidationException(120, $invalidAttributes);
+			}
+		}
 }
 	

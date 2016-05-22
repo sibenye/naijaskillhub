@@ -18,6 +18,7 @@ class Users_model extends CI_Model {
                 $this->load->database();
 				$this->load->helper('date');
 				$this->load->model('UserCredentials_model');
+				$this->load->model('UserAttributeValues_model');
         }
         
         public function get_user($get_data)
@@ -59,34 +60,12 @@ class Users_model extends CI_Model {
         	
         	$user->credentialTypes = $this->UserCredentials_model->getCredentialTypes($user->id);
         	
-        	$this->getAttributes($user);
+        	$user->attributes = $this->UserAttributeValues_model->getAttributes($user->id);
         	
         	return $user;
         }
         
-        public function get_userAttributes($userId)
-        {
-        	$result = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
-        		
-        	if (empty($result)){
-        		$error_message = 'User does not exist';
-        		throw new NSH_ResourceNotFoundException(220, $error_message);
-        	}
-        		
-        	$user = new User();
-        	$user->id = $result['id'];
-        	$user->emailAddress = $result['emailAddress'];
-        	$user->username = $result['username'];
-        	$user->isActive = ($result['isActive'] == 1);
-        	
-        	$this->getAttributes($user);
-        	
-        	$userAttributes = $user->attributes;
-        	
-        	return $userAttributes;
-        }
-		
-		public function save_user($post_data)
+        public function save_user($post_data)
 		{
 			$isNewUserCreation = (!array_key_exists('id', $post_data) || empty($post_data['id']));
 			if ($isNewUserCreation
@@ -106,7 +85,7 @@ class Users_model extends CI_Model {
 			$user->credentialTypes = $this->UserCredentials_model->save_userCredential($post_data, $user->id);			
 			
 			if (array_key_exists('attributes', $post_data)){
-				$this->upsert_userAttributes($post_data['attributes'], $user);
+				$user->attributes = $this->UserAttributeValues_model->upsert_userAttributes($post_data['attributes'], $user->id);
 			}			
 			
 			return $user;
@@ -188,57 +167,6 @@ class Users_model extends CI_Model {
 				
 			$this->db->update(USERS_TABLE, $data, array('id' => $userId));
 				
-		}
-		
-		public function save_userAttributes($post_data)
-		{
-			$userId = $post_data['id'];
-			$result = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
-			
-			if (empty($result)){
-				$error_message = 'User does not exist';
-				throw new NSH_ResourceNotFoundException(220, $error_message);
-			}
-			
-			$user = new User();
-			$user->id = $result['id'];
-			$user->emailAddress = $result['emailAddress'];
-			$user->username = $result['username'];
-			$user->isActive = ($result['isActive'] == 1);
-			
-			unset($post_data['id']);
-			
-			$this->validateAttributes($post_data);
-			
-			$this->upsert_userAttributes($post_data, $user);
-		}
-		
-		private function upsert_userAttributes($attributes, $user)
-		{
-			$userId = $user->id;
-			$modifiedDate = mdate(DATE_TIME_STRING, time());
-			
-			$savedAttributes = array();
-			if (empty($attributes))
-			{
-				$this->getAttributes($user);
-				return;
-			}
-			
-			foreach ($attributes as $key => $value) {
-				$attributeId = $this->db->get_where(USERATTRIBUTES_TABLE, array('name' => $key))->row_array()['id'];
-				if (!empty($this->db->get_where(USERATTRIBUTEVALUES_TABLE, array('userAttributeId' => $attributeId, 'userId' => $userId))->row_array()))
-				{
-					$data = array('attributeValue' => $value, 'modifiedDate' => $modifiedDate);
-					$this->db->update(USERATTRIBUTEVALUES_TABLE, $data, array('userAttributeId' => $attributeId, 'userId' => $userId));
-				}
-				else {
-					$data = array('attributeValue' => $value, 'userAttributeId' => $attributeId, 'userId' => $userId, 'createdDate' => $modifiedDate, 'modifiedDate' => $modifiedDate);
-					$this->db->insert(USERATTRIBUTEVALUES_TABLE, $data);
-				}
-			}
-			
-			$this->getAttributes($user);
 		}
 		
 		private function upsert_user($post_data)
@@ -355,46 +283,6 @@ class Users_model extends CI_Model {
 			return ($existingUser && !empty($existingUser));
 		}
 		
-		private function getAttributes($user)
-		{
-			$userId = $user->id;
-			
-			$attributes = null;
-			
-			$this->db->select(USERATTRIBUTEVALUES_TABLE.'.attributeValue,'.USERATTRIBUTES_TABLE.'.name');
-			$this->db->from(USERATTRIBUTEVALUES_TABLE);
-			$this->db->join(USERATTRIBUTES_TABLE, USERATTRIBUTES_TABLE.'.id = '.USERATTRIBUTEVALUES_TABLE.'.userAttributeId');
-			$this->db->where('userId', $userId);
-			$userAttributes = $this->db->get()->result_array();
-			
-			foreach ($userAttributes as $userAttribute) {
-				$attributes[$userAttribute['name']] = $userAttribute['attributeValue'];
-			}
-			$user->attributes = $attributes;			
-		}
-		
-		private function validateAttributes($attributes)
-		{
-			if (empty($attributes))
-			{
-				return;
-			}
-			
-			$invalidAttributes = array();
-			
-			$i = 0;			
-			foreach ($attributes as $key => $value) {
-				if (empty($this->db->get_where(USERATTRIBUTES_TABLE, array('name' => $key))->row_array())){
-					$invalidAttributes[$i] = $key;
-					++$i;
-				}
-			}
-			
-			if (!empty($invalidAttributes)){
-				throw new NSH_ValidationException(120, $invalidAttributes);
-			}
-		}
-		
 		private function validateUserPostData($post_data)
 		{
 			$isNewUserCreation = (!array_key_exists('id', $post_data) || empty($post_data['id']));
@@ -440,7 +328,7 @@ class Users_model extends CI_Model {
 			
 			if (array_key_exists('attributes', $post_data))
 			{
-				$this->validateAttributes($post_data['attributes']);
+				$this->UserAttributeValues_model->validateAttributes($post_data['attributes']);
 			}
 			
 		}

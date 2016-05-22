@@ -14,6 +14,7 @@ class Users extends NSH_Controller {
     {
         parent::__construct();
         $this->load->model('Users_model');
+		$this->load->model('UserAttributeValues_model');
     }
     
     function users_get()
@@ -31,7 +32,7 @@ class Users extends NSH_Controller {
     function attributes_get()
     {
     	try {
-    		$userAttributes = $this->Users_model->get_userAttributes($this->get('id'));
+    		$userAttributes = $this->UserAttributeValues_model->get_userAttributes($this->get('id'));
     	
     		$this->successResponse($userAttributes);
     	} catch (NSH_Exception $e) {
@@ -62,7 +63,7 @@ class Users extends NSH_Controller {
 				$post_data['id'] = $this->get('id');
 			}
 				
-			$this->Users_model->save_userAttributes($post_data);
+			$this->UserAttributeValues_model->save_userAttributes($post_data);
 			 
 			$this->successResponse();
 		} catch (NSH_Exception $e){

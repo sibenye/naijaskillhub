@@ -318,7 +318,7 @@ $config['cache_query_string'] = FALSE;
 | http://codeigniter.com/user_guide/libraries/encryption.html
 |
 */
-$config['encryption_key'] = '';
+$config['encryption_key'] = 'testKey';
 
 /*
 |--------------------------------------------------------------------------
@@ -515,3 +515,14 @@ $config['rewrite_short_tags'] = FALSE;
 | Array:		array('10.0.1.200', '192.168.5.0/24')
 */
 $config['proxy_ips'] = '';
+
+/**
+ * -------------------------------------------------------------------------
+ * ResetToken Live Span
+ * -------------------------------------------------------------------------
+ * 
+ * In an email authentication loop this is how long (in minutes) the token 
+ * will last before it expires.
+ * 
+ */
+$config['token_live_span'] = 15;

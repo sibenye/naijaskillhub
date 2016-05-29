@@ -2,13 +2,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 
-class NSH_CryptoService
+trait NSH_CryptoService
 {
-	const COST = '10';
-	
-	public static function secure_hash($password)
+	private  $COST = '10';
+		
+	public function secure_hash($password)
 	{
-		$options = ['cost' => self::COST];
+		$options = ['cost' => $this->COST];
 			
 		$hashed_pwd = password_hash($password, PASSWORD_BCRYPT, $options);
 		
@@ -20,13 +20,30 @@ class NSH_CryptoService
 		return $hashed_pwd;
 	}
 	
-	public static function generate_salt()
+	public function generate_salt()
+	{
+		return $this->secure_random();
+	}
+	
+	public function secure_random()
 	{
 		return mcrypt_create_iv(22, MCRYPT_DEV_URANDOM);
 	}
 	
-	public static function is_verified($password, $hash)
+	public function is_verified($password, $hash)
 	{
 		return password_verify($password, $hash);
+	}
+	
+	public function encode($str)
+	{
+		$this->load->library('encrypt');
+		return $this->encrypt->encode($str);
+	}
+	
+	public function decode($str)
+	{
+		$this->load->library('encrypt');
+		return $this->encrypt->decode($str);
 	}
 }

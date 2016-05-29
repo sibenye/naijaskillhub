@@ -96,6 +96,7 @@ define ( 'STANDARD_CREDENTIALTYPE', 'STANDARD' );
 define ( 'FACEBOOK_CREDENTIALTYPE', 'FACEBOOK' );
 define ( 'GOOGLE_CREDENTIALTYPE', 'GOOGLE' );
 define ( 'DATE_TIME_STRING', '%Y/%m/%d %H:%i:%s' );
+define ( 'DATE_STRING', '%Y/%m/%d' );
 
 // Database Table Names without the 'nsh_' prefix
 define ( 'CATEGORIES_TABLE', 'categories' );

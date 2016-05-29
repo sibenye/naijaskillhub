@@ -14,6 +14,9 @@ use \YaLinqo\Enumerable;
 class UserCredentials_model extends CI_Model
 {
 	use NSH_Utils;
+	use NSH_CryptoService;
+	
+	const resetKey_delimiter = '<>';
 	
 	public function __construct()
 	{
@@ -70,11 +73,11 @@ class UserCredentials_model extends CI_Model
 			if (empty($userCredentialsQueryResult))
 			{
 				$nowDate = mdate(DATE_TIME_STRING, time());
-				$password = NSH_CryptoService::secure_hash($post_data['password']);
+				$passwordHash = $this->secure_hash($post_data['password']);
 				$data = array(
 						'userId' => $userId,
 						'credentialTypeId' => $credentialTypeId,
-						'password' => $password,
+						'password' => $passwordHash,
 						'createdDate' => $nowDate,
 						'modifiedDate' => $nowDate
 						);
@@ -131,41 +134,192 @@ class UserCredentials_model extends CI_Model
 		return $userCredentialTypes;
 	}
 	
-	private function validatePostData($post_data) 
+	public function change_password($post_data)
 	{
-		if (!array_key_exists('credentialType', $post_data) || empty($post_data['credentialType']))
+		if (!array_key_exists('newPassword', $post_data) || empty($post_data['newPassword']))
 		{
-			$error_message = 'credentialType is required';
+			$error_message = 'newPassword is required';
+			throw new NSH_ValidationException(110, $error_message);
+		}
+			
+		if ((!array_key_exists('resetToken', $post_data) || empty($post_data['resetToken']))
+				&& (!array_key_exists('oldPassword', $post_data) || empty($post_data['oldPassword'])))
+		{
+			$error_message = 'oldPassword or resetToken is required';
+			throw new NSH_ValidationException(110, $error_message);
+		}
+			
+		if (array_key_exists('resetToken', $post_data)
+				&& array_key_exists('oldPassword', $post_data))
+		{
+			$error_message = 'oldPassword and resetToken are mutually exclusive. Only one should be provided';
+			throw new NSH_ValidationException(110, $error_message);
+		}
+			
+		if ((array_key_exists('oldPassword', $post_data) && !empty($post_data['oldPassword']))
+				&& (!array_key_exists('userId', $post_data) || empty($post_data['userId'])))
+		{
+			$error_message = 'userId is required when oldPassword is provided';
 			throw new NSH_ValidationException(110, $error_message);
 		}
 		
-		if (!$this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
-				&& !$this->equalIgnorecase($post_data['credentialType'], FACEBOOK_CREDENTIALTYPE)
-				&& !$this->equalIgnorecase($post_data['credentialType'], GOOGLE_CREDENTIALTYPE))
+		if (array_key_exists('oldPassword', $post_data) && $post_data['oldPassword'] == $post_data['newPassword'])
 		{
-			$error_message = 'CredentialType should be either STANDARD, FACEBOOK or GOOGLE';
+			//new password cannot be thesame as old password
+			throw new NSH_ValidationException(116);
+		}
+			
+		$userId = NULL;
+		$isNewStdCred = false;
+		$credentialTypeId = NULL;
+			
+		//validate new password
+		$newPassword = $post_data['newPassword'];
+			
+		Password_validation::validate($newPassword);
+			
+		if (array_key_exists('resetToken', $post_data)
+				&& !empty($post_data['resetToken']))
+		{
+			$resetKeyEncoded = $post_data['resetToken'];
+			//decrypt the encoded resetKey
+			$resetKeyDecoded = $this->decode($resetKeyEncoded);
+			//split the resetKey and get the resetToken
+			list($resetDateStr, $emailAddress, $resetToken) =  explode(self::resetKey_delimiter, $resetKeyDecoded);
+			//verify resetToken has not expired
+			$nowDate = new DateTime();
+			$resetDate = new DateTime($resetDateStr);
+			$elaspedTime = $nowDate->diff($resetDate)->i; //get the difference in minutes
+			$tokenLiveSpan = $this->config->item('token_live_span');
+			if ($elaspedTime > $tokenLiveSpan)
+			{
+				throw new NSH_ValidationException(121);
+			}
+			//verify resetToken
+			$this->db->select('id,resetToken');
+			$existingUser = $this->db->get_where(USERS_TABLE, array('emailAddress' => $emailAddress))->row_array();
+			
+			if (empty($existingUser) || empty($existingUser['resetToken']))
+			{
+				throw new NSH_ValidationException(122);
+			}
+			
+			$resetTokenHash = $existingUser['resetToken'];
+			if (!$this->is_verified($resetToken, $resetTokenHash))
+			{
+				throw new NSH_ValidationException(122);
+			}
+			
+			$userId = $existingUser['id'];
+			
+			$existingStdCred = $this->db->get_where(USERSTANDARDCREDENTIALS_TABLE, array('userId' => $userId))->row_array();
+			
+			if (empty($existingStdCred))
+			{
+				$isNewStdCred = true;
+				$this->db->select('id');				
+				$credentialTypeId = $this->db->get_where(CREDENTIALTYPES_TABLE,
+						array('name' => $post_data['credentialType']))->row_array()['id'];
+			}
+	
+		}
+			
+		if (array_key_exists('oldPassword', $post_data)
+				&& !empty($post_data['oldPassword']))
+		{
+			//check user exists
+			$userId = $post_data['userId'];
+			$existingUser = $this->db->get_where(USERS_TABLE, array('id' => $userId))->row_array();
+			if (empty($existingUser))
+			{
+				$error_message = 'User does not exist';
+				throw new NSH_ResourceNotFoundException(220, $error_message);
+			}
+			//get existing password hash
+			$this->db->select('password');
+			$result = $this->db->get_where(USERSTANDARDCREDENTIALS_TABLE, array('userId' => $userId))->row_array();
+	
+			if (empty($result))
+			{
+				throw new NSH_ResourceNotFoundException(221);
+			}
+	
+			//verify old password
+			$existingPwdHash = $result['password'];
+			$oldPassword = $post_data['oldPassword'];
+	
+			if (!$this->is_verified($oldPassword, $existingPwdHash))
+			{
+				throw new NSH_ValidationException(115);
+			}
+		}
+		
+		$modifiedDate = mdate(DATE_TIME_STRING, time());
+		$passwordHash = $this->secure_hash($newPassword);
+		
+		if (!$isNewStdCred)
+		{
+			//update the password
+			
+			$data = array(
+					'password' => $passwordHash,
+					'modifiedDate' => $modifiedDate
+			);
+			$this->db->update(USERSTANDARDCREDENTIALS_TABLE, $data, array('userId' => $userId));
+		}
+		else {
+			$data = array(
+					'userId' => $userId,
+					'credentialTypeId' => $credentialTypeId,
+					'password' => $passwordHash,
+					'createdDate' => $modifiedDate,
+					'modifiedDate' => $modifiedDate
+			);
+			
+			$this->db->insert(USERSTANDARDCREDENTIALS_TABLE, $data);
+		}
+		
+		//clear the resetToken
+		$this->db->update(USERS_TABLE, array('resetToken' => NULL, 'modifiedDate' => $modifiedDate), array('id' => $userId));
+		
+	}
+	
+	public function reset_password($post_data)
+	{
+		//email address is required
+		if (!array_key_exists('emailAddress', $post_data) || empty($post_data['emailAddress']))
+		{
+			$error_message = 'emailAddress is required';
 			throw new NSH_ValidationException(110, $error_message);
 		}
 		
-		if ($this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
-				&& (!array_key_exists('password', $post_data) || empty($post_data['password'])))
+		$emailAddress = $post_data['emailAddress'];
+		//verify user exists with this email address
+		$existingUser = $this->db->get_where(USERS_TABLE, array('emailAddress' => $emailAddress))->row_array();
+		if (empty($existingUser))
 		{
-			$error_message = 'password is required for STANDARD crendentialType';
-			throw new NSH_ValidationException(110, $error_message);
+			//if email doesn't exist just return without throwing.
+			return;
 		}
 		
-		if (!$this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
-				&& (!array_key_exists('socialId', $post_data) || empty($post_data['socialId'])))
-		{
-			$error_message = 'SocialId is required for FACEBOOK or GOOGLE crendentialType';
-			throw new NSH_ValidationException(110, $error_message);
-		}
+		$userId = $existingUser['id'];
 		
-		if (array_key_exists('password', $post_data) && !empty($post_data['password']))
-		{
-			//check password meets criteria
-			Password_validation::validate($post_data['password']);
-		}
+		//generate random string
+		$resetToken = $this->secure_random();
+		//hash the random string and save in database
+		$resetTokenHash = $this->secure_hash($resetToken);
+		
+		$this->db->update(USERS_TABLE, array('resetToken' => $resetTokenHash), array('id' => $userId));
+		
+		//concat user's email + today's datetime + the resetToken and encrypt it
+		$nowDate = mdate(DATE_TIME_STRING, time());
+		
+		$resetKey = $nowDate.self::resetKey_delimiter.$emailAddress.self::resetKey_delimiter.$resetToken;
+		
+		$resetKeyEncoded = $this->encode($resetKey);
+		
+		//TODO build reset url and send a reset password email
+		return;
 	}
 	
 	public function delete_userCredential($delete_data)
@@ -209,5 +363,42 @@ class UserCredentials_model extends CI_Model
 		
 		$this->db->delete(USERGENERICCREDENTIALS_TABLE, array('userId' => $userId, 'credentialTypeId' => $credentialTypeId));		
 		
+	}
+	
+	private function validatePostData($post_data)
+	{
+		if (!array_key_exists('credentialType', $post_data) || empty($post_data['credentialType']))
+		{
+			$error_message = 'credentialType is required';
+			throw new NSH_ValidationException(110, $error_message);
+		}
+	
+		if (!$this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
+				&& !$this->equalIgnorecase($post_data['credentialType'], FACEBOOK_CREDENTIALTYPE)
+				&& !$this->equalIgnorecase($post_data['credentialType'], GOOGLE_CREDENTIALTYPE))
+		{
+			$error_message = 'CredentialType should be either STANDARD, FACEBOOK or GOOGLE';
+			throw new NSH_ValidationException(110, $error_message);
+		}
+	
+		if ($this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
+				&& (!array_key_exists('password', $post_data) || empty($post_data['password'])))
+		{
+			$error_message = 'password is required for STANDARD crendentialType';
+			throw new NSH_ValidationException(110, $error_message);
+		}
+	
+		if (!$this->equalIgnorecase($post_data['credentialType'], STANDARD_CREDENTIALTYPE)
+				&& (!array_key_exists('socialId', $post_data) || empty($post_data['socialId'])))
+		{
+			$error_message = 'SocialId is required for FACEBOOK or GOOGLE crendentialType';
+			throw new NSH_ValidationException(110, $error_message);
+		}
+	
+		if (array_key_exists('password', $post_data) && !empty($post_data['password']))
+		{
+			//check password meets criteria
+			Password_validation::validate($post_data['password']);
+		}
 	}
 }

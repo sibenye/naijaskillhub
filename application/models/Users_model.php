@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+require_once(APPPATH.'/core/security/NSH_CryptoService.php');
 require_once(APPPATH.'/core/utilities/NSH_Utils.php');
 require_once(APPPATH.'/core/validations/Users_creation_validation.php');
 require_once(APPPATH.'/core/validations/Password_validation.php');
@@ -13,6 +14,9 @@ require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
 class Users_model extends CI_Model {
 	
 		use NSH_Utils;
+		use NSH_CryptoService;
+		
+		const activationKey_delimiter = '<>';
 		
 		public function __construct()
         {
@@ -87,7 +91,13 @@ class Users_model extends CI_Model {
 			
 			if (array_key_exists('attributes', $post_data)){
 				$user->attributes = $this->UserAttributeValues_model->upsert_userAttributes($post_data['attributes'], $user->id);
-			}			
+			}
+			
+			if ($isNewUserCreation)
+			{
+				//send activation email
+				$this->sendActivationEmail($user);
+			}
 			
 			return $user;
 		}
@@ -170,6 +180,44 @@ class Users_model extends CI_Model {
 				
 		}
 		
+		public function activate_user($post_data)
+		{
+			if (!array_key_exists('activationToken', $post_data) 
+					|| empty($post_data['activationToken']))
+			{
+				$error_message = 'activationToken is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			$activationKeyEncoded = $post_data['activationToken'];
+			//decrypt the encoded activationKey
+			$activationKeyDecoded = $this->decode($activationKeyEncoded);
+			//split the activationKey and get the activationToken
+			list($emailAddress, $activationToken) =  explode(self::activationKey_delimiter, $activationKeyDecoded);
+			
+			//verify activationToken
+			$this->db->select('id,activationToken');
+			$existingUser = $this->db->get_where(USERS_TABLE, array('emailAddress' => $emailAddress))->row_array();
+				
+			if (empty($existingUser) || empty($existingUser['activationToken']))
+			{
+				//throw invalid activation token error
+				throw new NSH_ValidationException(123);
+			}
+			
+			$activationKeyTokenHash = $existingUser['activationToken'];
+			if (!$this->is_verified($activationToken, $activationKeyTokenHash))
+			{
+				throw new NSH_ValidationException(123);
+			}
+			
+			//activate user
+			$userId = $existingUser['id'];
+			$modifiedDate = mdate(DATE_TIME_STRING, time());
+			$this->db->update(USERS_TABLE, array('isActive' => true, 'activationToken' => NULL, 'modifiedDate' => $modifiedDate), array('id' => $userId));
+			
+		}
+		
 		private function upsert_user($post_data)
 		{
 			$userId = null;
@@ -239,7 +287,7 @@ class Users_model extends CI_Model {
 			$user->isActive = ($userQueryResult['isActive'] == 1);
 			
 			return $user;		
-		}
+		}		
 				
 		private function userEmailInUse($email, $userId = NULL)
 		{
@@ -338,6 +386,23 @@ class Users_model extends CI_Model {
 				$this->UserAttributeValues_model->validateAttributes($post_data['attributes']);
 			}
 			
+		}
+		
+		private function sendActivationEmail($user)
+		{
+			//generate random string
+			$activationToken = $this->secure_random();
+			//hash the random string and save in database
+			$activationTokenHash = $this->secure_hash($activationToken);
+				
+			$this->db->update(USERS_TABLE, array('activationToken' => $activationTokenHash), array('id' => $user->id));
+				
+			//concat user's email + the activationToken and encrypt it				
+			$activationKey = $user->emailAddress.self::activationKey_delimiter.$activationToken;
+				
+			$activationKeyEncoded = $this->encode($activationKey);
+				
+			//TODO: build activation url and send activation email
 		}
 }
 	

@@ -18,6 +18,7 @@ class errorCodes {
 			120 => 'Invalid User attribute',
 			121 => 'resetToken is expired',
 			122 => 'resetToken is invalid',
+			123 => 'activationToken is invalid',
 			220 => 'Object Not Found',
 			221 => 'User does not have standard credential'
 		);	

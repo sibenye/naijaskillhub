@@ -124,6 +124,19 @@ class Users extends NSH_Controller {
 		}
 	}
 	
+	function activate_post()
+	{
+		try {
+			$post_data = $this->post();
+					
+			$this->Users_model->activate_user($post_data);
+		
+			$this->successResponse();
+		} catch (NSH_Exception $e){
+			$this->errorResponse($e);
+		}
+	}
+	
 	function credentials_delete()
 	{
 		try {

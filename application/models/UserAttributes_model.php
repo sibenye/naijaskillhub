@@ -15,10 +15,10 @@ class UserAttributes_model extends CI_Model {
                 $this->load->database();
         }
 		
-		public function get_userAttributes($id = FALSE)
+		public function get_userAttributes($id)
 		{
 			$result = NULL;
-			if ($id === FALSE)
+			if (empty($id))
 	        {
                 $query = $this->db->get(USERATTRIBUTES_TABLE);
                 $result = $query->result_array();
@@ -27,7 +27,7 @@ class UserAttributes_model extends CI_Model {
 		        $result = $query->row_array();	
 	        }
 			
-			if (!$result){
+			if (empty($result)){
 				$message = 'No UserAttributes found';
 				throw new NSH_ResourceNotFoundException(220, $message);
 			}
@@ -52,36 +52,42 @@ class UserAttributes_model extends CI_Model {
 	        $query = $this->db->get_where(USERATTRIBUTES_TABLE, array('name' => $name));
 			$existingUserAttribute = $query->row_array();
 			
-			if (!empty($post_data['id']))
+			$this->load->helper('date');
+			$nowDate = mdate(DATE_TIME_STRING, time());
+			
+			$id = array_key_exists ( 'id', $post_data ) ? $post_data ['id'] : null;
+			
+			if (!empty($id))
 	        {
-	        	if ($existingUserAttribute && $existingUserAttribute['id'] !== $post_data['id'])
+	        	//ensure that the id is valid.
+	        	if (empty($this->db->get_where(USERATTRIBUTES_TABLE, array('id' => $id))->row_array()))
 	        	{
-					//throw or return error
-					$error_message = 'The name \''.$name.'\' is already in use';
-					throw new NSH_ValidationException(110, $error_message);
-				}
-	        	$id = $post_data['id'];
-	        	$data = array('name' => $post_data['name']);
+	        		$error_message = 'User Attribute Id does not exist';
+	        		throw new NSH_ResourceNotFoundException(220, $error_message);
+	        	}
+	        	
+	        	if ($existingUserAttribute && $existingUserAttribute['id'] !== $id)
+	        	{
+	        		//this means the name is already in use
+					throw new NSH_ValidationException(119);
+				}				
+	        	
+	        	$data = array(
+	        			'name' => $post_data['name'], 
+	        			'modifiedDate' => $nowDate	        			
+	        	);
 				return $this->db->update(USERATTRIBUTES_TABLE, $data, array('id' => $id));
 			}
 			
 			if ($existingUserAttribute)
 			{
-				//throw or return error
-				$error_message = 'The name \''.$name.'\' is already in use';
-				throw new NSH_ValidationException(110, $error_message);
+				throw new NSH_ValidationException(119, $error_message);
 			}
 			
-			$this->load->helper('date');
-			
-			$datestring = '%Y/%m/%d %H:%i:%s';
-			$time = time();
-		
-			$nowDate = mdate($datestring, $time);
-		
-		    $data = array(
+			$data = array(
 		        'name' => $post_data['name'],
-		        'createdDate' => $nowDate
+		        'createdDate' => $nowDate,
+				'modifiedDate' => $nowDate
 		    );
 		
 		    return $this->db->insert(USERATTRIBUTES_TABLE, $data);			

@@ -32,3 +32,4 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /license.txt
 /readme.rst
 /readme.rst
+/.buildpath

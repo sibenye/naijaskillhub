@@ -22,23 +22,27 @@ class Categories_model extends CI_Model {
 		public function get_categories($id = null, $parentId = null)
 		{
 			$result = NULL;
+			$request = NULL;
+			if (!empty($id))
+			{
+				$request['id'] = $id;
+			}
+				
+			if (!empty($parentId))
+			{
+				$request['parentId'] = $parentId;
+			}
 			
-	        if (empty($id) && empty($parentId))
-	        {
-                $query = $this->db->get(CATEGORIES_TABLE);
-                $result = $query->result_array();
-	        } else if (empty($parentId)) {
-	        	$query = $this->db->get_where(CATEGORIES_TABLE, array('id' => $id));			
-	        	$result = $query->row_array();
-	        } else if (empty($id)) {
-	        	$query = $this->db->get_where(CATEGORIES_TABLE, array('parentId' => $parentId));
-	        	$result = $query->result_array();
-	        } else {
-	        	$query = $this->db->get_where(CATEGORIES_TABLE, array('id' => $id, 'parentId' => $parentId));
-	        	$result = $query->row_array();
-	        }
-	
-	        if (!$result){
+			if ($request)
+			{
+				$result = $this->db->get_where(CATEGORIES_TABLE, $request)->result_array();
+			}
+			else
+			{
+				$result = $this->db->get(CATEGORIES_TABLE)->result_array();
+			}
+			
+	        if (!$result || count($result) == 0 || $result[0] == NULL){
 				$message = 'No categories found';
 				throw new NSH_ResourceNotFoundException(220, $message);
 			}
@@ -69,14 +73,13 @@ class Categories_model extends CI_Model {
 			if (!empty($parentId)){
 				$queryForParent = $this->db->get_where(CATEGORIES_TABLE, array('id' => $parentId));
 				if (!$queryForParent->row_array()){
-					$error_message = 'Parent Category does not exist';
+					$error_message = 'Parent Category Id does not exist';
 					throw new NSH_ResourceNotFoundException(220, $error_message);
 				}
 				
 				//ensure that parentId is not equal to id
 				if ($parentId == $id){
-					$error_message = 'Parent CategoryId can not be the same as the CategoryId';
-					throw new NSH_ValidationException(110, $error_message);
+					throw new NSH_ValidationException(117);
 				}
 			}			
 			
@@ -85,10 +88,14 @@ class Categories_model extends CI_Model {
 			
 			if (!empty($id))
 	        {
-	        	if ($existingCategory && $existingCategory['id'] !== $post_data['id']){
-					$error_message = 'The name \''.$name.'\' is already in use';
-					throw new NSH_ValidationException(110, $error_message);
-				}
+	        	if (empty($this->db->get_where(CATEGORIES_TABLE, array('id' => $id))->row_array())){
+	        		$error_message = 'Category Id does not exist';
+	        		throw new NSH_ResourceNotFoundException(220, $error_message);
+	        	}
+	        	
+	        	if ($existingCategory && $existingCategory['id'] !== $id){
+					throw new NSH_ValidationException(118, $error_message);
+				}				
 				
 				$parentId = !empty($parentId) ? $parentId : $existingCategory['parentId'];
 				$description = !empty($description)  ? $description : $existingCategory['description'];
@@ -105,8 +112,7 @@ class Categories_model extends CI_Model {
 			
 			if ($existingCategory)
 			{
-				$error_message = 'The name \''.$name.'\' is already in use';
-				throw new NSH_ValidationException(110, $error_message);
+				throw new NSH_ValidationException(118, $error_message);
 			}
 		
 		    $data = array(

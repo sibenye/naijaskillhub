@@ -60,12 +60,12 @@ $route['translate_uri_dashes'] = FALSE;
 */
 //$route['api/userAttributes/(:num)(\.)([a-zA-Z0-9_-]+)(.*)'] = 'api/admin/userAttributes/id/$1/format/$3$4'; 
 //api routes
-$route['api/admin/(:any)/(:num)'] = 'api/admin/$1/id/$2'; 
-$route['api/admin/(:any)'] = 'api/admin/$1';
-$route['api/(:any)/(:num)/(:any)'] = 'api/$1/$3/id/$2'; 
-$route['api/(:any)/(:num)'] = 'api/$1/$1/id/$2';
-$route['api/(:any)/(:any)'] = 'api/$1/$2';
-$route['api/(:any)'] = 'api/$1/$1';
+$route['admin/(:any)/(:num)'] = 'admin/$1/id/$2'; 
+$route['admin/(:any)'] = 'admin/$1';
+$route['(:any)/(:num)/(:any)'] = '$1/$3/id/$2'; 
+$route['(:any)/(:num)'] = '$1/$1/id/$2';
+$route['(:any)/(:any)'] = '$1/$2';
+$route['(:any)'] = '$1/$1';
 
 
 /*
@@ -86,10 +86,10 @@ $route['api/(:any)'] = 'api/$1/$1';
 //$route['admin/userAttributes/(:num)'] = 'admin/userAttributes/view/1'
 //$route['admin/userAttributes/create'] = 'admin/userAttributes/create'
 //$route['admin/userAttributes'] = 'admin/userAttributes'
-$route['admin/(:any)/(:num)/(:any)'] = 'web/admin/$1/$3/$2';
-$route['admin/(:any)/(:num)'] = 'web/admin/$1/view/$2';
-$route['admin/(:any)/(:any)'] = 'web/admin/$1/$2';
-$route['admin/(:any)'] = 'web/admin/$1';
+//$route['admin/(:any)/(:num)/(:any)'] = 'web/admin/$1/$3/$2';
+//$route['admin/(:any)/(:num)'] = 'web/admin/$1/view/$2';
+//$route['admin/(:any)/(:any)'] = 'web/admin/$1/$2';
+//$route['admin/(:any)'] = 'web/admin/$1';
 
 //site routes
 //$route['(:any)/(:num)/(:any)'] = 'web/public/$1/$3/$2';

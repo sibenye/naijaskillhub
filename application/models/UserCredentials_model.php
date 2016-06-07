@@ -241,7 +241,7 @@ class UserCredentials_model extends CI_Model
 	
 			if (empty($result))
 			{
-				throw new NSH_ResourceNotFoundException(221);
+				throw new NSH_ResourceNotFoundException(222);
 			}
 	
 			//verify old password
@@ -338,22 +338,19 @@ class UserCredentials_model extends CI_Model
 		
 		if ($this->equalIgnorecase(STANDARD_CREDENTIALTYPE, $credentialTypeToBeDeleted))
 		{
-			$error_message = 'Standard credentials can not be deleted, only social credentials';
-			throw new NSH_ValidationException(110, $error_message);
+			throw new NSH_ValidationException(223);
 		}
 		
 		$existingCredentialTypes = Enumerable::from($user->credentialTypes)->select('$credType ==> strtolower($credType)')->toArray();
 		
 		if (!in_array($credentialTypeToBeDeleted, $existingCredentialTypes))
 		{
-			$error_message = 'User does not have this type of credential';
-			throw new NSH_ValidationException(110, $error_message);
+			throw new NSH_ValidationException(225);
 		}
 		
 		if (count($existingCredentialTypes) == 1)
 		{
-			$error_message = 'Can not delete the only remaining credential';
-			throw new NSH_ValidationException(110, $error_message);
+			throw new NSH_ValidationException(224);
 		}
 		
 		$credentialTypeResult = $this->db->get_where(CREDENTIALTYPES_TABLE,

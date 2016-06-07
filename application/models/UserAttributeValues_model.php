@@ -21,7 +21,7 @@ class UserAttributeValues_model extends CI_Model {
 				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
 		
-			$userAttributes = $this->getAttributes($userId);
+			$userAttributes = array('id' => $userId, 'attributes' => $this->getAttributes($userId));
 			 
 			return $userAttributes;
 		}
@@ -51,6 +51,12 @@ class UserAttributeValues_model extends CI_Model {
 				$error_message = 'User does not exist';
 				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
+			
+			if (!array_key_exists('attributes', $post_data) || empty($post_data['attributes']))
+			{
+				$error_message = 'attributes collection is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
 				
 			$user = new User();
 			$user->id = $result['id'];
@@ -58,11 +64,9 @@ class UserAttributeValues_model extends CI_Model {
 			$user->username = $result['username'];
 			$user->isActive = ($result['isActive'] == 1);
 				
-			unset($post_data['id']);
+			$this->validateAttributes($post_data['attributes']);
 				
-			$this->validateAttributes($post_data);
-				
-			return $this->upsert_userAttributes($post_data, $userId);
+			return $this->upsert_userAttributes($post_data['attributes'], $userId);
 		}
 		
 		public function upsert_userAttributes($attributes, $userId)
@@ -72,7 +76,11 @@ class UserAttributeValues_model extends CI_Model {
 			$savedAttributes = array();
 			if (empty($attributes))
 			{
-				return $this->getAttributes($userId);
+				$response = array(
+						'id' => $userId,
+						'attributes' => $this->getAttributes($userId)
+				);
+				return $response;
 			}
 				
 			foreach ($attributes as $key => $value) {
@@ -88,7 +96,11 @@ class UserAttributeValues_model extends CI_Model {
 				}
 			}
 				
-			return $this->getAttributes($userId);
+			$response = array(
+				'id' => $userId,
+				'attributes' => $this->getAttributes($userId)
+			);
+			return $response;
 		}
 		
 		public function validateAttributes($attributes)

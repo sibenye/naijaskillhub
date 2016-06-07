@@ -24,6 +24,7 @@ class Users_model extends CI_Model {
 				$this->load->helper('date');
 				$this->load->model('UserCredentials_model');
 				$this->load->model('UserAttributeValues_model');
+				$this->load->model('Portfolios_model');
         }
         
         public function get_user($get_data)
@@ -70,11 +71,15 @@ class Users_model extends CI_Model {
         	return $user;
         }
         
-        public function save_user($post_data)
+        public function create_user($post_data)
 		{
-			$isNewUserCreation = (!array_key_exists('id', $post_data) || empty($post_data['id']));
-			if ($isNewUserCreation
-					&& !array_key_exists('credentialType', $post_data))
+			if (array_key_exists('id', $post_data) && !empty($post_data['id']))
+			{
+				$error_message = 'User Id is not needed for new user creation, for user update use the http PUT method';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			if (!array_key_exists('credentialType', $post_data))
 			{
 				//default to STANDARD credentialType
 				$post_data['credentialType'] = STANDARD_CREDENTIALTYPE;
@@ -93,12 +98,33 @@ class Users_model extends CI_Model {
 				$user->attributes = $this->UserAttributeValues_model->upsert_userAttributes($post_data['attributes'], $user->id);
 			}
 			
-			if ($isNewUserCreation)
-			{
-				//send activation email
-				$this->sendActivationEmail($user);
-			}
+			//send activation email
+			$this->sendActivationEmail($user);
 			
+			return $user;
+		}
+		
+		public function update_user($post_data)
+		{
+			if (!array_key_exists('id', $post_data) || empty($post_data['id']))
+			{
+				$error_message = 'The User Id is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+				
+			//validate post data
+			$this->validateUserPostData($post_data);
+				
+			$user = $this->upsert_user($post_data);
+			//insert credential
+			//Note that credentials will only be inserted if the user does not have that credentialType
+			//If the user already has that credentialType it will do nothing.
+			$user->credentialTypes = $this->UserCredentials_model->save_userCredential($post_data, $user->id);
+				
+			if (array_key_exists('attributes', $post_data)){
+				$user->attributes = $this->UserAttributeValues_model->upsert_userAttributes($post_data['attributes'], $user->id);
+			}
+				
 			return $user;
 		}
 		
@@ -165,7 +191,7 @@ class Users_model extends CI_Model {
 				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
 				
-			//ensure that the username is not in use
+			//ensure that the emailAddress is not in use
 			if ($this->userEmailInUse($emailAddress, $userId))
 			{
 				//return error that this emailAddress is in use
@@ -216,6 +242,115 @@ class Users_model extends CI_Model {
 			$modifiedDate = mdate(DATE_TIME_STRING, time());
 			$this->db->update(USERS_TABLE, array('isActive' => true, 'activationToken' => NULL, 'modifiedDate' => $modifiedDate), array('id' => $userId));
 			
+		}
+		
+		public function get_userPortfolio($get_data)
+		{
+			if (!array_key_exists('id', $get_data) || empty($get_data['id']))
+			{
+				$error_message = 'The User Id is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			$data = array('userId' => $get_data['id']);
+			
+			if (array_key_exists('portfolioId', $get_data))
+			{
+				$data['id'] = $get_data['portfolioId'];
+			}
+			
+			if (array_key_exists('categoryId', $get_data))
+			{
+				$data['categoryId'] = $get_data['categoryId'];
+			}
+			
+			$portfolios = $this->Portfolios_model->get_portfolios_by_userId($data);
+			
+			$userPortfolios = array(
+					'id' => $get_data['id'],
+					'portfolios' => $portfolios
+			);
+			
+			return $userPortfolios;
+		}
+		
+		public function create_userPortfolio($post_data)
+		{
+			if (!array_key_exists('id', $post_data) || empty($post_data['id']))
+			{
+				$error_message = 'The User Id is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			//ensure that the user exists
+			if(!$this->userExists($post_data['id'])){
+				$error_message = "User does not exist";
+				throw new NSH_ResourceNotFoundException(220, $error_message);
+			}
+			
+			if (!array_key_exists('portfolio', $post_data) || empty($post_data['portfolio']))
+			{
+				$error_message = 'The Portfolio object is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+				
+			$userId = $post_data['id'];
+			$portfolio = $post_data['portfolio'];
+		
+			$this->Portfolios_model->validatePortfolioPostData($portfolio, $userId);
+			
+			$this->Portfolios_model->upsert_portfolio($portfolio, $userId);
+		}
+		
+		public function update_userPortfolio($post_data)
+		{
+			if (!array_key_exists('id', $post_data) || empty($post_data['id']))
+			{
+				$error_message = 'The User Id is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			//ensure that the user exists
+			if(!$this->userExists($post_data['id'])){
+				$error_message = "User does not exist";
+				throw new NSH_ResourceNotFoundException(220, $error_message);
+			}
+			
+			if (!array_key_exists('portfolio', $post_data) || empty($post_data['portfolio']))
+			{
+				$error_message = 'The Portfolio object is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			$userId = $post_data['id'];
+			$portfolio = $post_data['portfolio'];
+		
+			$this->Portfolios_model->validatePortfolioPostData($portfolio, $userId, TRUE);
+				
+			$this->Portfolios_model->upsert_portfolio($portfolio, $userId);
+		}
+		
+		public function delete_userPortfolio($delete_data)
+		{
+			if (!array_key_exists('id', $delete_data) || empty($delete_data['id']))
+			{
+				$error_message = 'The User Id is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			//ensure that the user exists
+			if(!$this->userExists($delete_data['id'])){
+				$error_message = "User does not exist";
+				throw new NSH_ResourceNotFoundException(220, $error_message);
+			}
+			
+			if (!array_key_exists('portfolioId', $delete_data) || empty($delete_data['portfolioId']))
+			{
+				$error_message = 'The Portfolio Id is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			$this->Portfolios_model->delete_portfolio($delete_data['portfolioId']);
 		}
 		
 		private function upsert_user($post_data)
@@ -386,7 +521,7 @@ class Users_model extends CI_Model {
 				$this->UserAttributeValues_model->validateAttributes($post_data['attributes']);
 			}
 			
-		}
+		}		
 		
 		private function sendActivationEmail($user)
 		{

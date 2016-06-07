@@ -20,6 +20,6 @@ class Home extends CI_Controller {
 	 */
 	public function index()
 	{
-		$this->template->load('default', 'home/index');
+		$this->template->load(ADMIN_TEMPLATE_NAME, 'home/index');
 	}
 }

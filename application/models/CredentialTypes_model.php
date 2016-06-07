@@ -12,10 +12,10 @@ class CredentialTypes_model extends CI_Model {
                 $this->load->database();
         }
 		
-		public function get_credentialTypes($id = FALSE)
+		public function get_credentialTypes($id)
 		{
 			$result = NULL;
-	        if ($id === FALSE)
+	        if (empty($id))
 	        {
                 $query = $this->db->get(CREDENTIALTYPES_TABLE);
                 $result = $query->result_array();
@@ -24,7 +24,7 @@ class CredentialTypes_model extends CI_Model {
 	        	$result = $query->row_array();
 	        }
 	
-	        if (!$result){
+	        if (empty($result)){
 				$message = 'No CredentialTypes found';
 				throw new NSH_ResourceNotFoundException(220, $message);
 			}

@@ -16,21 +16,26 @@ class Portfolios_model extends CI_Model {
 		public function get_portfolios($id = NULL, $categoryId = NULL)
 		{
 			$results = array();
-	        if (!$id && !$categoryId)
-	        {
-                $query = $this->db->get(PORTFOLIOS_TABLE);
-				$results = $query->result_array();
-	        }elseif ($id && $categoryId){
-	        	$query = $this->db->get_where(PORTFOLIOS_TABLE, array('id' => $id, 'categoryId' => $categoryId));
-				$results[0] = $query->row_array();
-	        }elseif ($categoryId){
-	        	$query = $this->db->get_where(PORTFOLIOS_TABLE, array('categoryId' => $categoryId));
-				$results = $query->result_array();
-	        }else{
-	        	$query = $this->db->get_where(PORTFOLIOS_TABLE, array('id' => $id));					
-				$results[0] = $query->row_array();
-	        }
+			$request = NULL;
+			if ($id)
+			{
+				$request['id'] = $id;
+			}
 			
+			if ($categoryId)
+			{
+				$request['categoryId'] = $categoryId;
+			}
+				
+			if ($request)
+			{
+				$results = $this->db->get_where(PORTFOLIOS_TABLE, $request)->result_array();
+			}
+			else 
+			{
+				$results = $this->db->get(PORTFOLIOS_TABLE)->result_array();
+			}
+	        			
 			if (!$results || count($results) == 0 || $results[0] == NULL){
 				$message = 'No portfolios found';
 				throw new NSH_ResourceNotFoundException(220, $message);
@@ -48,72 +53,78 @@ class Portfolios_model extends CI_Model {
 			return $results;        
 		}
 		
-		public function save_portfolio($post_data)
+		public function get_portfolios_by_userId($get_data)
 		{
-			//validate post data
-			$this->validation = new Portfolios_validation();
-			$rules = $this->validation->validation_rules;
-			
-			$this->load->library('form_validation', $rules);
-			$this->form_validation->validate($post_data);
-			if ($this->form_validation->error_array() || empty($post_data)){
-				throw new NSH_ValidationException(110, $this->form_validation->error_array());
-			}
-
-			//ensure that the category Id exists
-			$existingCategory = $this->db->get_where(CATEGORIES_TABLE, array('id' => $post_data['categoryId']))->row_array();
-			if(!$existingCategory || empty($existingCategory)){
-				$error_message = "Category does not exist";
-				throw new NSH_ResourceNotFoundException(220, $error_message);
+			$results = array();
+			$request = array('userId' => $get_data['userId']);
+			if (array_key_exists('id', $get_data))
+			{
+				$request['id'] = $get_data['id'];
 			}
 			
-			//ensure that the user exists
-			$existingUser = $this->db->get_where(USERS_TABLE, array('id' => $post_data['userId']))->row_array();
-			if(!$existingUser || empty($existingUser)){
-				$error_message = "User does not exist";
-				throw new NSH_ResourceNotFoundException(220, $error_message);
+			if (array_key_exists('categoryId', $get_data))
+			{
+				$request['categoryId'] = $get_data['categoryId'];
 			}
 			
-			//check if user already has a portfolio in this category
-			$existingPortfolio = $this->db->get_where(PORTFOLIOS_TABLE, array('userId' => $existingUser['id'], 'categoryId' => $existingCategory['id']))->row_array();
+			$query = $this->db->get_where(PORTFOLIOS_TABLE, $request);
+			$results = $query->result_array();
+			
+			if (!$results || count($results) == 0 || $results[0] == NULL){
+				$message = 'No portfolios found';
+				throw new NSH_ResourceNotFoundException(220, $message);
+			}
+				
+			foreach ($results as $key => $value) {
+				//retrieve images and videos
+				$videos = $this->db->get_where(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
+				$images = $this->db->get_where(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
+		
+				$results[$key]['videos'] = $videos;
+				$results[$key]['images'] = $images;
+			}
+		
+			return $results;
+		}
+		
+		public function upsert_portfolio($portfolio, $userId)
+		{
+			$id = NULL;
+			if (array_key_exists('id', $portfolio) && !empty($portfolio['id']))
+			{
+				$id = $portfolio['id'];
+			}
 			
 			$this->load->helper('date');
+			$nowDate = mdate(DATE_TIME_STRING, time());
 			
-			$datestring = '%Y/%m/%d %H:%i:%s';
-			$time = time();
-		
-			$nowDate = mdate($datestring, $time);
-			
-			if ($existingPortfolio && !empty($existingPortfolio))
+			if (!empty($id))
 	        {
-	        	$id = $existingPortfolio['id'];
 	        	$data = array(
-	        	'modifiedDate' => $nowDate);
+	        			'categoryId' => $portfolio['categoryId'],
+	        			'modifiedDate' => $nowDate	        			
+	        	);
 				
 				$this->db->update(PORTFOLIOS_TABLE, $data, array('id' => $id));
 			} else{
 				$data = array(
-			        'categoryId' => $post_data['categoryId'],
-			        'userId' => $post_data['userId'],
+			        'categoryId' => $portfolio['categoryId'],
+			        'userId' => $userId,
 			        'createdDate' => $nowDate,
 			        'modifiedDate' => $nowDate
 			    );
 		
 		    	$this->db->insert(PORTFOLIOS_TABLE, $data);
-		    	$existingPortfolio = $this->db->get_where(PORTFOLIOS_TABLE, array('userId' => $existingUser['id'], 'categoryId' => $existingCategory['id']))->row_array();
+		    	$existingPortfolio = $this->db->get_where(PORTFOLIOS_TABLE, array('userId' => $userId, 'categoryId' => $portfolio['categoryId']))->row_array();
 				$id = $existingPortfolio['id'];
 			}			
 				
-			if (array_key_exists('images', $post_data) && $post_data['images']){
-				$this->save_portfolio_images($id, $post_data);
-			} else {
-				$this->delete_portfolio_images($id);
+			if (array_key_exists('images', $portfolio)){
+				$this->save_portfolio_images($id, $portfolio);
 			}
 			
-			if (array_key_exists('videos', $post_data) && $post_data['videos']){
-				$this->save_portfolio_videos($id, $post_data);
-			} else {
-				$this->delete_portfolio_videos($id);
+			if (array_key_exists('videos', $portfolio)){
+				$this->save_portfolio_videos($id, $portfolio);
 			}
 			
 			return;
@@ -133,7 +144,63 @@ class Portfolios_model extends CI_Model {
 	        }
 		}
 		
+		public function validatePortfolioPostData($post_data, $userId, $isUpdate = FALSE)
+		{
+			if (!array_key_exists('categoryId', $post_data) || empty($post_data['categoryId']))
+			{
+				$error_message = 'The Category Id is required';
+				throw new NSH_ValidationException(110, $error_message);
+			}
+			
+			if ($isUpdate)
+			{
+				if (!array_key_exists('id', $post_data) || empty($post_data['id']))
+				{
+					$error_message = 'The Portfolio Id is required';
+					throw new NSH_ValidationException(110, $error_message);
+				}
+				
+				//check if portfolio exists
+				$existingPortfolio = $this->db->get_where(PORTFOLIOS_TABLE, array('id' => $post_data['id']))->row_array();
+				
+				if (empty($existingPortfolio))
+				{
+					$error_message = 'Portfolio does not exist';
+					throw new NSH_ValidationException(220);
+				}
+			}
+				
+			//ensure that the category Id exists
+			$existingCategory = $this->db->get_where(CATEGORIES_TABLE, array('id' => $post_data['categoryId']))->row_array();
+			if(!$existingCategory || empty($existingCategory)){
+				$error_message = "Category does not exist";
+				throw new NSH_ResourceNotFoundException(220, $error_message);
+			}
+				
+			//check if user already has a portfolio in this category
+			$existingPortfolio = $this->db->get_where(PORTFOLIOS_TABLE, array('userId' => $userId, 'categoryId' => $post_data['categoryId']))->row_array();
+				
+			if (!empty($existingPortfolio))
+			{
+				if ($isUpdate && $post_data['id'] != $existingPortfolio['id'])
+				{
+					throw new NSH_ValidationException(230);
+				}
+				elseif (!$isUpdate)
+				{
+					throw new NSH_ValidationException(230);
+				}
+			}
+		}		
+		
 		private function save_portfolio_images($portfolioId, $post_data){
+			//if images collection is empty, then delete all images associated with this portfolio
+			if (empty($post_data['images']))
+			{
+				$this->delete_portfolio_images($id);
+				return;
+			}
+			
 			$portfolioImagesInRequest = array();
 			for ($i=0, $size = count($post_data['images']); $i < $size; $i++) { 
 				$portfolioImagesInRequest[$i] = strtolower($post_data['images'][$i]['imageUrl']);
@@ -160,6 +227,12 @@ class Portfolios_model extends CI_Model {
 		}
 		
 		private function save_portfolio_videos($portfolioId, $post_data){
+			//if videos collection is empty, then delete all videos associated with this portfolio
+			if (empty($post_data['videos']))
+			{
+				$this->delete_portfolio_videos($id);
+				return;
+			}
 			$portfolioVideosInRequest = array();
 			for ($i=0, $size = count($post_data['videos']); $i < $size; $i++) { 
 				$portfolioVideosInRequest[$i] = strtolower($post_data['videos'][$i]['videoUrl']);
@@ -201,7 +274,6 @@ class Portfolios_model extends CI_Model {
 			} else {
 				$result = $this->db->delete(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $portfolioId, 'videoUrl' => $videoUrl));
 			}			
-		}
-		
+		}		
 		
 }

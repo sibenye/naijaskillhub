@@ -16,8 +16,6 @@ class UserCredentials_model extends CI_Model
 	use NSH_Utils;
 	use NSH_CryptoService;
 	
-	const resetKey_delimiter = '<>';
-	
 	public function __construct()
 	{
 		$this->load->database();
@@ -185,7 +183,7 @@ class UserCredentials_model extends CI_Model
 			//decrypt the encoded resetKey
 			$resetKeyDecoded = $this->decode($resetKeyEncoded);
 			//split the resetKey and get the resetToken
-			list($resetDateStr, $emailAddress, $resetToken) =  explode(self::resetKey_delimiter, $resetKeyDecoded);
+			list($resetDateStr, $emailAddress, $resetToken) =  explode(RESET_KEY_DELIMITER, $resetKeyDecoded);
 			//verify resetToken has not expired
 			$nowDate = new DateTime();
 			$resetDate = new DateTime($resetDateStr);
@@ -314,7 +312,7 @@ class UserCredentials_model extends CI_Model
 		//concat user's email + today's datetime + the resetToken and encrypt it
 		$nowDate = mdate(DATE_TIME_STRING, time());
 		
-		$resetKey = $nowDate.self::resetKey_delimiter.$emailAddress.self::resetKey_delimiter.$resetToken;
+		$resetKey = $nowDate.RESET_KEY_DELIMITER.$emailAddress.RESET_KEY_DELIMITER.$resetToken;
 		
 		$resetKeyEncoded = $this->encode($resetKey);
 		

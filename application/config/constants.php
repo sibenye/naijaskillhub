@@ -97,6 +97,8 @@ define ( 'FACEBOOK_CREDENTIALTYPE', 'FACEBOOK' );
 define ( 'GOOGLE_CREDENTIALTYPE', 'GOOGLE' );
 define ( 'DATE_TIME_STRING', '%Y/%m/%d %H:%i:%s' );
 define ( 'DATE_STRING', '%Y/%m/%d' );
+define ( 'RESET_KEY_DELIMITER', '<>');
+define ( 'AUTH_KEY_DELIMITER', '<>');
 
 // Database Table Names without the 'nsh_' prefix
 define ( 'CATEGORIES_TABLE', 'categories' );
@@ -109,6 +111,7 @@ define ( 'USERATTRIBUTEVALUES_TABLE', 'userattributevalues' );
 define ( 'USERSTANDARDCREDENTIALS_TABLE', 'userstandardcredentials' );
 define ( 'USERGENERICCREDENTIALS_TABLE', 'usergenericcredentials' );
 define ( 'USERS_TABLE', 'users' );
+define ( 'USERSESSIONS_TABLE', 'usersessions' );
 
 // Url Constants
 define ( 'ADMIN_URL_PREFIX', 'admin' );

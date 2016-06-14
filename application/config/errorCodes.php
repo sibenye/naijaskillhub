@@ -8,6 +8,7 @@ class errorCodes {
 	
 	public static $codes = array(
 			100 => 'An Error Occured',
+			109 => 'Invalid username or password',
 			110 => 'Validation Error',
 			111 => 'This username is not available',
 			112 => 'This emailAddress is already in use',

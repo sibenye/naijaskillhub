@@ -385,6 +385,132 @@
   },
   {
     "type": "post",
+    "url": "/authentication/login",
+    "title": "Authenticate User",
+    "name": "LoginUser",
+    "group": "Authentication",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "username",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "password",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "authKey",
+            "description": "<p>Authorization Key.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"status\" : 0,\n\t\"message\" : \"success\",\n\t\"response\" : {\"authKey\" : \"...8yIepkSfHkFFSZiLujlpQL...\"}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Validation Error:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n\t\"status\" : 109,\n\t\"message\" : \"Invalid username or password\",\n\t\"errorDetail\" : \"\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "110",
+            "description": "<p>Validation Error</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "109",
+            "description": "<p>Invalid username or password</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "application/controllers/Authentication.php",
+    "groupTitle": "Authentication"
+  },
+  {
+    "type": "post",
+    "url": "/authentication/logout",
+    "title": "Logout User",
+    "name": "LogoutUser",
+    "group": "Authentication",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "authKey",
+            "description": "<p>Authorization Key</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n\t\"status\" : 0,\n\t\"message\" : \"success\",\n\t\"response\" : null\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Validation Error:",
+          "content": "HTTP/1.1 400 Bad Request\n{\n\t\"status\" : 110,\n\t\"message\" : \"Validation Error\",\n\t\"errorDetail\" : \"authKey is required\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "110",
+            "description": "<p>Validation Error</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "application/controllers/Authentication.php",
+    "groupTitle": "Authentication"
+  },
+  {
+    "type": "post",
     "url": "/passwords/change",
     "title": "Change Password",
     "name": "ChangePassword",

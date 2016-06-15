@@ -88,9 +88,26 @@ class Authentication_model extends CI_Model
 			
 		} catch (NSH_ResourceNotFoundException $e) {
 			throw new NSH_ValidationException(109);
+		}		
+		
+	}
+	
+	public function logout($post_data)
+	{
+		if (!array_key_exists('authKey', $post_data) || empty($post_data['authKey']))
+		{
+			$error_message = 'authKey is required';
+			throw new NSH_ValidationException(110, $error_message);
 		}
 		
+		$authKey = $post_data['authKey'];
 		
+		$sessionRecord = $this->db->get_where(USERSESSIONS_TABLE, array('authorizationKey' => $authKey))->row_array();
+		
+		if (!empty($sessionRecord))
+		{
+			$this->db->update(USERSESSIONS_TABLE, array('authorizationKey' => NULL), array('userId' => $sessionRecord['userId']));
+		}
 	}
 	
 }

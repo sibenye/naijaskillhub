@@ -28,7 +28,8 @@ class errorCodes {
 			223 => 'Standard credentials cannot be deleted, only social credentials',
 			224 => 'Cannot delete the only remaining credential',
 			225 => 'CredentialType does not exist for User',
-			230 => 'User already has portfolio in this category'
+			230 => 'User already has portfolio in this category',
+			405 => 'Unable to authorize user'
 		);	
 }
 

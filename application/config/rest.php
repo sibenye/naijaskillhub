@@ -277,7 +277,7 @@ $config['rest_database_group'] = 'default';
 | The table name in your database that stores API keys
 |
 */
-$config['rest_keys_table'] = 'keys';
+$config['rest_keys_table'] = 'apikeys';
 
 /*
 |--------------------------------------------------------------------------
@@ -291,6 +291,7 @@ $config['rest_keys_table'] = 'keys';
 | Default table schema:
 |   CREATE TABLE `keys` (
 |       `id` INT(11) NOT NULL AUTO_INCREMENT,
+|       `user_id` INT(11) NOT NULL,
 |       `key` VARCHAR(40) NOT NULL,
 |       `level` INT(2) NOT NULL,
 |       `ignore_limits` TINYINT(1) NOT NULL DEFAULT '0',
@@ -301,7 +302,7 @@ $config['rest_keys_table'] = 'keys';
 |   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_keys'] = FALSE;
+$config['rest_enable_keys'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------
@@ -353,7 +354,7 @@ $config['rest_key_length'] = 40;
 | 2012/06/12. See RFC 6648 specification for more details
 |
 */
-$config['rest_key_name'] = 'X-API-KEY';
+$config['rest_key_name'] = 'nsh-api-key';
 
 /*
 |--------------------------------------------------------------------------
@@ -405,6 +406,7 @@ $config['rest_logs_table'] = 'logs';
 |   CREATE TABLE `access` (
 |       `id` INT(11) unsigned NOT NULL AUTO_INCREMENT,
 |       `key` VARCHAR(40) NOT NULL DEFAULT '',
+|       `all_access` TINYINT(1) NOT NULL DEFAULT '0',
 |       `controller` VARCHAR(50) NOT NULL DEFAULT '',
 |       `date_created` DATETIME DEFAULT NULL,
 |       `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -412,7 +414,7 @@ $config['rest_logs_table'] = 'logs';
 |    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 |
 */
-$config['rest_enable_access'] = FALSE;
+$config['rest_enable_access'] = TRUE;
 
 /*
 |--------------------------------------------------------------------------

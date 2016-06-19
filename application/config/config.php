@@ -318,7 +318,7 @@ $config['cache_query_string'] = FALSE;
 | http://codeigniter.com/user_guide/libraries/encryption.html
 |
 */
-$config['encryption_key'] = 'testKey';
+$config['encryption_key'] = 'y7T|345GHZ(e';
 
 /*
 |--------------------------------------------------------------------------
@@ -516,13 +516,33 @@ $config['rewrite_short_tags'] = FALSE;
 */
 $config['proxy_ips'] = '';
 
-/**
- * -------------------------------------------------------------------------
- * ResetToken Live Span
- * -------------------------------------------------------------------------
- * 
- * In an email authentication loop this is how long (in minutes) the token 
- * will last before it expires.
- * 
+/*
+ | -------------------------------------------------------------------------
+ | ResetToken Live Span
+ | -------------------------------------------------------------------------
+ | 
+ | In an email authentication loop this is how long (in minutes) the token 
+ | will last before it expires.
+ | 
  */
 $config['token_live_span'] = 15;
+
+/*
+ |--------------------------------------------------------------------------
+ | AUTH Key Variable
+ |--------------------------------------------------------------------------
+ |
+ | Custom header to specify the Authorization key
+ |
+ */
+$config['auth_key_name'] = 'NSH-AUTH-KEY';
+
+/*
+ |--------------------------------------------------------------------------
+ | AUTH Key Live Span
+ |--------------------------------------------------------------------------
+ |
+ | How long (in minutes) before the Authorization key expires
+ |
+ */
+$config['auth_key_live_span'] = 1440; 

@@ -313,6 +313,7 @@ class Users extends NSH_Controller {
 	 */
 	function users_put()
 	{
+		$this->session_authorize();
 		try {
 			$post_data = $this->put();
 			
@@ -369,6 +370,7 @@ class Users extends NSH_Controller {
 	 */
 	function attributes_post()
 	{
+		$this->session_authorize();
 		try {
 			$post_data = $this->post();
 			
@@ -422,6 +424,7 @@ class Users extends NSH_Controller {
 	 */
 	function credentials_post()
 	{
+		$this->session_authorize();
 		try {
 			$post_data = $this->post();
 				
@@ -472,6 +475,7 @@ class Users extends NSH_Controller {
 	 */
 	function emailAddress_put()
 	{
+		$this->session_authorize();
 		try {
 			$post_data = $this->put();
 		if (!array_key_exists('id', $post_data)){
@@ -521,6 +525,7 @@ class Users extends NSH_Controller {
 	 */
 	function username_put()
 	{
+		$this->session_authorize();
 		try {
 			$post_data = $this->put();
 			if (!array_key_exists('id', $post_data)){
@@ -610,6 +615,7 @@ class Users extends NSH_Controller {
 	 */
 	function portfolios_post()
 	{
+		$this->session_authorize();
 		try {
 			$post_data = $this->post();
 			if (!array_key_exists('id', $post_data)){
@@ -659,6 +665,7 @@ class Users extends NSH_Controller {
 	 */
 	function portfolios_put()
 	{
+		$this->session_authorize();
 		try {
 			$post_data = $this->put();
 			if (!array_key_exists('id', $post_data)){
@@ -710,6 +717,7 @@ class Users extends NSH_Controller {
 	 */
 	function credentials_delete()
 	{
+		$this->session_authorize();
 		try {
 			$delete_data = $this->query();
 			if (!array_key_exists('id', $delete_data)){
@@ -755,6 +763,7 @@ class Users extends NSH_Controller {
 	 */
 	function portfolios_delete()
 	{
+		$this->session_authorize();
 		try {
 			$delete_data = $this->query();
 			if (!array_key_exists('id', $delete_data)){

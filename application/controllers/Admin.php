@@ -250,6 +250,7 @@ class Admin extends NSH_Controller {
 	  *
 	  * @apiParam {String} name  Category name.
 	  * @apiParam {Number} [id]
+	  * @apiParam {Number} [parentId]
 	  * @apiParam {String} [description]
 	  * @apiParam {String} [imageUrl]
 	  *

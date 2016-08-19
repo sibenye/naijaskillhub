@@ -83,8 +83,7 @@ class Categories_model extends CI_Model {
 				}
 			}			
 			
-	        $query = $this->db->get_where(CATEGORIES_TABLE, array('name' => $name));
-			$existingCategory = $query->row_array();
+	        $existingCategory = $this->db->get_where(CATEGORIES_TABLE, array('name' => $name))->row_array();
 			
 			if (!empty($id))
 	        {

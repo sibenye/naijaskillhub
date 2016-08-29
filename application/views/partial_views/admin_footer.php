@@ -1,5 +1,5 @@
 
-<p class="footer"><em>&copy; 2015</em></p>
+<p class="footer"><em>&copy; <?php echo date('Y') ?></em></p>
 </div>
         </body>
 </html>

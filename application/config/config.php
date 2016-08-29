@@ -23,11 +23,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$domain = 'http://localhost/naijaskillhub';
-if (ENVIRONMENT === 'production'){
-	$domain = 'http://naijaskillhub.com';
+$domain = $_SERVER['HTTP_HOST'];
+$domain .= str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']);
+//$domain = 'localhost/naijaskillhub-api';
+if (!empty($_SERVER['HTTPS']))
+{
+    $config['base_url'] = 'https://'.$domain;
 }
-$config['base_url'] = $domain;
+else
+{
+    $config['base_url'] = 'http://'.$domain;
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +45,7 @@ $config['base_url'] = $domain;
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------

@@ -24,16 +24,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 $domain = $_SERVER['HTTP_HOST'];
-$domain .= str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']);
-//$domain = 'localhost/naijaskillhub-api';
-if (!empty($_SERVER['HTTPS']))
-{
-    $config['base_url'] = 'https://'.$domain;
-}
-else
-{
-    $config['base_url'] = 'http://'.$domain;
-}
+    $domain .= str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']);
+    //$domain = 'localhost/naijaskillhub-api';
+    if (!empty($_SERVER['HTTPS']))
+    {
+        $config['base_url'] = 'https://'.$domain;
+    }
+    else
+    {
+        $config['base_url'] = 'http://'.$domain;
+    }
+
 
 /*
 |--------------------------------------------------------------------------
@@ -523,6 +524,10 @@ $config['rewrite_short_tags'] = FALSE;
 $config['proxy_ips'] = '';
 
 /*
+ * Below are custom configs for naijaskillhub-api
+ */
+
+/*
  | -------------------------------------------------------------------------
  | ResetToken Live Span
  | -------------------------------------------------------------------------
@@ -552,3 +557,4 @@ $config['auth_key_name'] = 'NSH-AUTH-KEY';
  |
  */
 $config['auth_key_live_span'] = 1440; 
+

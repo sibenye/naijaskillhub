@@ -118,3 +118,8 @@ define ( 'ADMIN_URL_PREFIX', 'admin' );
 define ( 'ADMIN_USER_ATTRIBUTES', 'admin_userAttributes' );
 define ( 'ADMIN_SKILL_CATEGORIES', 'admin_skillCategories' );
 define ( 'ADMIN_SKILLS', 'admin_skills' );
+
+// Email Constants
+define ( 'EMAIL_FROM_NAME', 'Naija Skill Hub' );
+define ( 'EMAIL_ACTIVATION_SUBJECT', 'Activate Your Account' );
+define ( 'ACTIVATION_KEY_DELIMITER', '<>' );

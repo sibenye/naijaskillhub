@@ -23,17 +23,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$domain = $_SERVER['HTTP_HOST'];
-$domain .= str_replace(basename($_SERVER['SCRIPT_NAME']),"",$_SERVER['SCRIPT_NAME']);
-//$domain = 'localhost/naijaskillhub-api';
-if (!empty($_SERVER['HTTPS']))
-{
-    $config['base_url'] = 'https://'.$domain;
-}
-else
-{
-    $config['base_url'] = 'http://'.$domain;
-}
+$domain = '';
+$config['base_url'] = $domain;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -523,13 +516,17 @@ $config['rewrite_short_tags'] = FALSE;
 $config['proxy_ips'] = '';
 
 /*
+ * Below are custom configs for naijaskillhub-api
+ */
+
+/*
  | -------------------------------------------------------------------------
  | ResetToken Live Span
  | -------------------------------------------------------------------------
- | 
- | In an email authentication loop this is how long (in minutes) the token 
+ |
+ | In an email authentication loop this is how long (in minutes) the token
  | will last before it expires.
- | 
+ |
  */
 $config['token_live_span'] = 15;
 
@@ -551,4 +548,5 @@ $config['auth_key_name'] = 'NSH-AUTH-KEY';
  | How long (in minutes) before the Authorization key expires
  |
  */
-$config['auth_key_live_span'] = 1440; 
+$config['auth_key_live_span'] = 1440;
+

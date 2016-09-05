@@ -16,8 +16,6 @@ class Users_model extends CI_Model {
 		use NSH_Utils;
 		use NSH_CryptoService;
 		
-		const activationKey_delimiter = '<>';
-		
 		public function __construct()
         {
                 $this->load->database();
@@ -25,6 +23,7 @@ class Users_model extends CI_Model {
 				$this->load->model('UserCredentials_model');
 				$this->load->model('UserAttributeValues_model');
 				$this->load->model('Portfolios_model');
+				$this->load->model('EmailSends_model');
         }
         
         public function get_user($get_data)
@@ -46,7 +45,7 @@ class Users_model extends CI_Model {
         	
         	if (empty($searchData)) {
         		$error_message = 'Id, or username, or emailAddress is required';
-        		throw new NSH_ValidationException(110, $error_message);        		
+        		throw new NSH_ValidationException(110, $error_message);
         	}
         	
         	$query = $this->db->get_where(USERS_TABLE, $searchData);
@@ -99,7 +98,7 @@ class Users_model extends CI_Model {
 			}
 			
 			//send activation email
-			$this->sendActivationEmail($user);
+			$this->EmailSends_model->send_activation_email($user);
 			
 			return $user;
 		}
@@ -219,7 +218,7 @@ class Users_model extends CI_Model {
 			//decrypt the encoded activationKey
 			$activationKeyDecoded = $this->decode($activationKeyEncoded);
 			//split the activationKey and get the activationToken
-			list($emailAddress, $activationToken) =  explode(self::activationKey_delimiter, $activationKeyDecoded);
+			list($emailAddress, $activationToken) =  explode(ACTIVATION_KEY_DELIMITER, $activationKeyDecoded);
 			
 			//verify activationToken
 			$this->db->select('id,activationToken');
@@ -521,23 +520,6 @@ class Users_model extends CI_Model {
 				$this->UserAttributeValues_model->validateAttributes($post_data['attributes']);
 			}
 			
-		}		
-		
-		private function sendActivationEmail($user)
-		{
-			//generate random string
-			$activationToken = $this->secure_random();
-			//hash the random string and save in database
-			$activationTokenHash = $this->secure_hash($activationToken);
-				
-			$this->db->update(USERS_TABLE, array('activationToken' => $activationTokenHash), array('id' => $user->id));
-				
-			//concat user's email + the activationToken and encrypt it				
-			$activationKey = $user->emailAddress.self::activationKey_delimiter.$activationToken;
-				
-			$activationKeyEncoded = $this->encode($activationKey);
-				
-			//TODO: build activation url and send activation email
 		}
+
 }
-	

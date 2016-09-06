@@ -11,14 +11,14 @@ require_once(APPPATH.'/core/exceptions/NSH_ValidationException.php');
  */
 
 class Emails extends NSH_Controller {
-    
+
     public function __construct()
     {
         parent::__construct();
         $this->load->model('EmailSends_model');
         $this->load->model('Users_model');
     }
-    
+
     /**
      * @api {post} /emails/send_activate Send Activation Email
      * @apiName SendActivationEmail
@@ -27,13 +27,6 @@ class Emails extends NSH_Controller {
      * @apiDescription Used to send activation email.
      *
      * @apiParam {String} emailAddress User's emailAddress.
-     *
-     * @apiSuccess {Number} id ID of the User.
-     * @apiSuccess {String} emailAddress  Email address of the User.
-     * @apiSuccess {String} username  Username of the User.
-     * @apiSuccess {Boolean} isActive  Indicates whether the User is active.
-     * @apiSuccess {Array} credentialTypes  An array of the User's credentialTypes.
-     * @apiSuccess {Dictionary} attributes  A dictionary list of the User's attributes.
      *
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK

@@ -1,4 +1,4 @@
-<?php 
+<?php
 defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 
@@ -6,5 +6,5 @@ defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 	<div id="body">
 
-		<p>Explore the <a href="apidoc">API Documentation</a>.</p>
+		<p>Explore the <a href="doc">API Documentation</a>.</p>
 	</div>

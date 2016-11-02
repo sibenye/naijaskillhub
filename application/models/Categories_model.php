@@ -93,7 +93,7 @@ class Categories_model extends CI_Model {
 	        		throw new NSH_ResourceNotFoundException(220, $error_message);
 	        	}
 
-	        	if ($existingCategory && $existingCategory['id'] !== $id){
+	        	if ($existingCategory && $existingCategory['id'] != $id){
 					throw new NSH_ValidationException(118, $error_message);
 				}
 

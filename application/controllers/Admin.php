@@ -5,11 +5,11 @@ require(APPPATH.'/controllers/NSH_Controller.php');
 
 /**
  * Admin Controller
- * api requests for admin resources are handled by this Controller. * 
+ * api requests for admin resources are handled by this Controller. *
  */
 
 class Admin extends NSH_Controller {
-        
+
     public function __construct()
     {
         parent::__construct();
@@ -17,7 +17,7 @@ class Admin extends NSH_Controller {
 		$this->load->model('CredentialTypes_model');
 		$this->load->model('Categories_model');
     }
-	
+
 	/**
 	 * @api {get} /admin/userAttributes Retrieve User Attibutes
 	 * @apiName GetUserAttribute
@@ -35,7 +35,7 @@ class Admin extends NSH_Controller {
 	 *			id: "1",
 	 *			name: "firstName",
 	 *			createdDate: "2015-12-07 03:38:46",
-	 *			modifiedDate: "2015-12-07 03:38:46"		
+	 *			modifiedDate: "2015-12-07 03:38:46"
 	 *		},
 	 *		{
 	 *			id: "2",
@@ -56,17 +56,17 @@ class Admin extends NSH_Controller {
 	 *
 	 * @apiError 220 Object Not Found
 	 *
-	 */ 
+	 */
     function userAttributes_get()
     {
     	try {
-    	    $userAttributes = $this->UserAttributes_model->get_userAttributes($this->get('id')); 
+    	    $userAttributes = $this->UserAttributes_model->get_userAttributes($this->get('id'));
 			$this->successResponse($userAttributes);
     	} catch (NSH_Exception $e){
     		$this->errorResponse($e);
     	}
     }
-    
+
     /**
      * @api {post} /admin/userAttributes Create/Update User Attributes
      * @apiName upsertUserAttribute
@@ -100,15 +100,15 @@ class Admin extends NSH_Controller {
     {
     	try {
     		$post_data = $this->post();
-			
+
 	        $this->UserAttributes_model->save_userAttribute($post_data);
-	         
+
 	        $this->successResponse();
     	} catch (NSH_Exception $e){
     		$this->errorResponse($e);
-    	}			
+    	}
     }
-	
+
     /**
      * @api {delete} /admin/userAttributes Delete User Attributes
      * @apiName DeleteUserAttribute
@@ -130,14 +130,14 @@ class Admin extends NSH_Controller {
     	try{
     		$id = $this->delete('id');
 	    	$this->UserAttributes_model->delete_userAttribute($id);
-	         
+
 	        $this->successResponse();
     	} catch (NSH_Exception $e){
     		$this->errorResponse($e);
-    	}    	
+    	}
     }
-	
-	
+
+
 	/**
 	 * @api {get} /admin/credentialTypes Retrieve CredentialTypes
 	 * @apiName GetCredentialType
@@ -153,7 +153,7 @@ class Admin extends NSH_Controller {
 	 *	"message" : "success",
 	 *	"response" : [{
 	 *			id: "1",
-	 *			name: "standard"	
+	 *			name: "standard"
 	 *		},
 	 *		{
 	 *			id: "2",
@@ -176,19 +176,19 @@ class Admin extends NSH_Controller {
 	 *
 	 * @apiError 220 Object Not Found
 	 *
-	 */ 
+	 */
 	 function credentialTypes_get()
     {
     	try {
-    		$credentialTypes = $this->CredentialTypes_model->get_credentialTypes($this->get('id'));      
-	        
+    		$credentialTypes = $this->CredentialTypes_model->get_credentialTypes($this->get('id'));
+
 	        $this->successResponse($credentialTypes);
     	} catch (NSH_Exception $e){
     		$this->errorResponse($e);
     	}
-        
+
     }
-	
+
 	/**
 	 * @api {get} /admin/categories Retrieve Categories
 	 * @apiName GetCategory
@@ -208,7 +208,7 @@ class Admin extends NSH_Controller {
 	 *			name: "Entertainment",
 	 *			parentId: null,
 	 *			description: null,
-	 *			imageUrl: null		
+	 *			imageUrl: null
 	 *		},
 	 *		{
 	 *			id: "2",
@@ -230,19 +230,19 @@ class Admin extends NSH_Controller {
 	 *
 	 * @apiError 220 Object Not Found
 	 *
-	 */ 
+	 */
 	 function categories_get()
 	 {
 	 	try {
-	 			        
-	        $categories = $this->Categories_model->get_categories($this->get('id'), $this->get('parentId'));      
-        
-        	$this->successResponse($categories); 
+
+	        $categories = $this->Categories_model->get_categories($this->get('id'), $this->get('parentId'));
+
+        	$this->successResponse($categories);
 	 	} catch (NSH_Exception $e){
     		$this->errorResponse($e);
-    	}	
+    	}
 	 }
-	 
+
 	 /**
 	  * @api {post} /admin/categories Create/Update Category
 	  * @apiName upsertCategory
@@ -253,6 +253,7 @@ class Admin extends NSH_Controller {
 	  * @apiParam {Number} [parentId]
 	  * @apiParam {String} [description]
 	  * @apiParam {String} [imageUrl]
+	  * @apiParam {String} [pluralName]
 	  *
 	  *
 	  * @apiSuccessExample Success-Response:
@@ -280,16 +281,16 @@ class Admin extends NSH_Controller {
 	 {
 	 	try {
 	 		$post_data = $this->post();
-		
+
         	$this->Categories_model->save_category($post_data);
-         
+
         	$this->successResponse();
 	 	} catch (NSH_Exception $e){
     		$this->errorResponse($e);
     	}
-	 	
+
 	 }
-	 
+
 	 /**
 	  * @api {delete} /admin/categories Delete Category
 	  * @apiName DeleteCategory
@@ -311,11 +312,10 @@ class Admin extends NSH_Controller {
 	 	try {
 	 		$id = $this->delete('id');
     		$this->Categories_model->delete_category($id);
-        	 
+
         	$this->successResponse();
 	 	} catch (NSH_Exception $e){
     		$this->errorResponse($e);
-    	}		 	
-	 }	 
+    	}
+	 }
 }
-    

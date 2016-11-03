@@ -129,15 +129,10 @@ class Users extends NSH_Controller {
      * @apiGroup Users
      *
      * @apiParam {Number} id User ID.
-     * @apiParam {Number} [portfolioId] Portfolio ID
-     * @apiParam {Number} [categoryId] Portfolio category ID
      *
      * @apiSuccess {Number} id User ID.
-     * @apiSuccess {Number} portfolios/id Portfolio ID.
-     * @apiSuccess {Number} portfolios/categoryId Portfolio category ID.
-     * @apiSuccess {Number} portfolios/userId  User ID.
-     * @apiSuccess {Date} portfolios/createdDate Portfolio created date.
-     * @apiSuccess {Date} portfolios/modifiedDate Portfolio modified date.
+     * @apiSuccess {Array} portfolios/categories An array of the Portfolio categories.
+     * @apiSuccess {Array} portfolios/voiceClips  An array of the Portfolio voice clips.
      * @apiSuccess {Array} portfolios/videos  An array of the Portfolio video urls.
      * @apiSuccess {Array} portfolios/images  An array of the Portfolio image urls.
      * 
@@ -148,26 +143,21 @@ class Users extends NSH_Controller {
 	 *	"message" : "success",
 	 *	"response" : [{
 	 *			"id" : "1",
-	 *			"portfolios" : [{
-	 *					"id" : "2",
-	 *					"categoryId" : "1",
-	 *					"userId" : "1",
-	 *					"createdDate" : "2015-12-27 04:37:58",
-	 *					"modifiedDate" : "2016-05-10 06:39:22",
-	 *					"videos" : [{
-	 *						"id" : "5",
-	 *						"portfolioId" : "2",
-	 *						"videoUrl" : "l:\\testdrive2.mp4"
-	 *						}
-	 *					],
-	 *					"images" : [{
-	 *						"id" : "4",
-	 *						"portfolioId" : "2",
-	 *						"imageUrl" : "c:\\secondimage.png"
-	 *						}
-	 *					]
-	 *				}
-	 *			]
+	 *			"portfolios" : {
+ *					"videos" : [{
+ *						"id" : "5",
+ *						"caption" : "video caption",
+ *						"videoUrl" : "l:\\testdrive2.mp4"
+ *						}
+ *					],
+ *					"images" : [{
+ *						"id" : "4",
+ *						"portfolioId" : "2",
+ *						"imageUrl" : "c:\\secondimage.png"
+ *						}
+ *					]
+ *				}
+	 *			
 	 *		}
 	 *	]
      * }
@@ -583,14 +573,25 @@ class Users extends NSH_Controller {
 	}
 	
 	/**
-	 * @api {post} /users/:id/portfolios Create User portfolio
-	 * @apiName CreateUserPortfolio
+	 * @api {post} /users/:id/portfolios Create/Update User portfolio
+	 * @apiName UpsertUserPortfolio
 	 * @apiGroup Users
 	 *
 	 * @apiParam {Number} id User's unique ID.
-	 * @apiParam {Number} portfolio/categoryId  Portfolio category ID.
-	 * @apiParam {String} [portfolio/videos/videoUrl]  Video URL.
-	 * @apiParam {String} [portfolio/images/imageUrl]  Image URL.
+	 * @apiParam {Number} [portfolio/categories/]  Array of Category IDs.
+	 * @apiParam {String} [portfolio/videos/videoPortfolioId]  Video Portfolio ID. Required if updating.
+	 * @apiParam {String} [portfolio/videos/videoUrl]  Video URL. Required if videos collection exists
+	 * @apiParam {String} [portfolio/videos/caption]  Video Caption. This is optional.
+	 * @apiParam {String} [portfolio/images/imagePortfolioId]  Image Portfolio ID. Required if updating.
+	 * @apiParam {String} [portfolio/images/imageUrl]  Video URL. Required if images collection exists
+	 * @apiParam {String} [portfolio/images/caption]  Image Caption. This is optional.
+	 * @apiParam {String} [portfolio/voiceClips/voiceClipPortfolioId]  VoiceClip Portfolio ID. Required if updating.
+	 * @apiParam {String} [portfolio/voiceClips/clipUrl]  Clip URL. Required if voiceClips collection exists
+	 * @apiParam {String} [portfolio/voiceClips/caption]  Clip Caption. Required if voiceClips collection exists.
+	 * @apiParam {String} [portfolio/credits/creditPortfolioId]  Credit Portfolio ID. Required if updating.
+	 * @apiParam {String} [portfolio/credits/creditTypeId]  CreditType ID URL. Required if credits collection exists
+	 * @apiParam {String} [portfolio/credits/caption]  Credit Caption. Required if credits collection exists.
+	 * @apiParam {String} [portfolio/credits/year]  Credit Year. Required if credits collection exists.
 	 *
 	 * @apiSuccessExample Success-Response:
 	 * HTTP/1.1 200 OK
@@ -605,7 +606,7 @@ class Users extends NSH_Controller {
 	 * {
 	 * 	"status" : 110,
 	 * 	"message" : "Validation Error",
-	 * 	"errorDetail" : "categoryId is required"
+	 * 	"errorDetail" : "userId is required"
 	 * }
 	 *
 	 * @apiError 110 Validation Error
@@ -623,7 +624,7 @@ class Users extends NSH_Controller {
 				$post_data['id'] = $this->get('id');
 			}
 		
-			$this->Users_model->create_userPortfolio($post_data);
+			$this->Users_model->upsert_userPortfolio($post_data);
 		
 			$this->successResponse();
 		} catch (NSH_Exception $e){
@@ -631,56 +632,7 @@ class Users extends NSH_Controller {
 		}
 	}
 	
-	/**
-	 * @api {put} /users/:id/portfolios Update User portfolio
-	 * @apiName UpdateUserPortfolio
-	 * @apiGroup Users
-	 *
-	 * @apiParam {Number} id User's unique ID.
-	 * @apiParam {Number} portfolio/id  Portfolio ID.
-	 * @apiParam {Number} portfolio/categoryId  Portfolio category ID.
-	 * @apiParam {String} [portfolio/videos/videoUrl]  Video URL.
-	 * @apiParam {String} [portfolio/images/imageUrl]  Image URL.
-	 *
-	 * @apiSuccessExample Success-Response:
-	 * HTTP/1.1 200 OK
-	 * {
-	 *	"status" : 0,
-	 *	"message" : "success",
-	 *	"response" : null
-	 * }
-	 *
-	 * @apiErrorExample Validation Error:
-	 * HTTP/1.1 400 Bad Request
-	 * {
-	 * 	"status" : 110,
-	 * 	"message" : "Validation Error",
-	 * 	"errorDetail" : "categoryId is required"
-	 * }
-	 *
-	 * @apiError 110 Validation Error
-	 * @apiError 220 Object Not Found
-	 * @apiError 230 User already has portfolio in this category
-	 *
-	 */
-	function portfolios_put()
-	{
-		$this->session_authorize();
-		try {
-			$post_data = $this->put();
-			if (!array_key_exists('id', $post_data)){
-				//if the user id is not in the post body get it from the request url
-				$post_data['id'] = $this->get('id');
-			}
 		
-			$this->Users_model->update_userPortfolio($post_data);
-		
-			$this->successResponse();
-		} catch (NSH_Exception $e){
-			$this->errorResponse($e);
-		}
-	}
-	
 	/**
 	 * @api {delete} /users/:id/credentials Delete User credential
 	 * @apiName DeleteUserCredential
@@ -737,8 +689,12 @@ class Users extends NSH_Controller {
 	 * @apiName DeleteUserPortfolio
 	 * @apiGroup Users
 	 *
-	 * @apiParam {Number} id User ID
-	 * @apiParam {String} portfolioId Portfolio ID.
+	 * @apiParam {Number} id User's unique ID.
+	 * @apiParam {Number} [portfolio/categories/]  Array of Category IDs.
+	 * @apiParam {String} [portfolio/videos/]  Array of Video Portfolio IDs.
+	 * @apiParam {String} [portfolio/images/]  Array of Image Portfolio IDs.
+	 * @apiParam {String} [portfolio/voiceClips/]  Array of VoiceClip Portfolio IDs.
+	 * @apiParam {String} [portfolio/credits/]  Array of Credits Portfolio IDs.
 	 *
 	 *
 	 * @apiSuccessExample Success-Response:
@@ -754,7 +710,7 @@ class Users extends NSH_Controller {
 	 * {
 	 * 	"status" : 110,
 	 * 	"message" : "Validation Error",
-	 * 	"errorDetail" : "The portfolio Id is required"
+	 * 	"errorDetail" : "The userId Id is required"
 	 * }
 	 *
 	 * @apiError 110 Validation Error

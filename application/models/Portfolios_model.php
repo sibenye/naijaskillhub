@@ -43,8 +43,8 @@ class Portfolios_model extends CI_Model {
 			
 			foreach ($results as $key => $value) {
 				//retrieve images and videos
-				$videos = $this->db->get_where(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
-				$images = $this->db->get_where(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
+				$videos = $this->db->get_where(USERS_VIDEOS_PORTFOLIO_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
+				$images = $this->db->get_where(USERS_IMAGES_PORTFOLIO_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
 				
 				$results[$key]['videos'] = $videos;
 				$results[$key]['images'] = $images;
@@ -77,8 +77,8 @@ class Portfolios_model extends CI_Model {
 				
 			foreach ($results as $key => $value) {
 				//retrieve images and videos
-				$videos = $this->db->get_where(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
-				$images = $this->db->get_where(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
+				$videos = $this->db->get_where(USERS_VIDEOS_PORTFOLIO_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
+				$images = $this->db->get_where(USERS_IMAGES_PORTFOLIO_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
 		
 				$results[$key]['videos'] = $videos;
 				$results[$key]['images'] = $images;
@@ -89,67 +89,168 @@ class Portfolios_model extends CI_Model {
 		
 		public function upsert_portfolio($portfolio, $userId)
 		{
-			$id = NULL;
-			if (array_key_exists('id', $portfolio) && !empty($portfolio['id']))
-			{
-				$id = $portfolio['id'];
-			}
-			
-			$this->load->helper('date');
-			$nowDate = mdate(DATE_TIME_STRING, time());
-			
-			if (!empty($id))
-	        {
-	        	$data = array(
-	        			'categoryId' => $portfolio['categoryId'],
-	        			'modifiedDate' => $nowDate	        			
-	        	);
-				
-				$this->db->update(PORTFOLIOS_TABLE, $data, array('id' => $id));
-			} else{
-				$data = array(
-			        'categoryId' => $portfolio['categoryId'],
-			        'userId' => $userId,
-			        'createdDate' => $nowDate,
-			        'modifiedDate' => $nowDate
-			    );
-		
-		    	$this->db->insert(PORTFOLIOS_TABLE, $data);
-		    	$existingPortfolio = $this->db->get_where(PORTFOLIOS_TABLE, array('userId' => $userId, 'categoryId' => $portfolio['categoryId']))->row_array();
-				$id = $existingPortfolio['id'];
-			}			
-				
+		    //validate the portfolio collections
+		    $this->validatePortfolioPostData($portfolio, $userId);
+		    
 			if (array_key_exists('images', $portfolio)){
-				$this->save_portfolio_images($id, $portfolio);
+				$this->save_portfolio_images($userId, $portfolio['images']);
 			}
 			
 			if (array_key_exists('videos', $portfolio)){
-				$this->save_portfolio_videos($id, $portfolio);
+				$this->save_portfolio_videos($userId, $portfolio['videos']);
+			}
+			
+			if (array_key_exists('categories', $portfolio)){
+			    $this->save_portfolio_categories($userId, $portfolio['categories']);
+			}
+				
+			if (array_key_exists('voiceClips', $portfolio)){
+			    $this->save_portfolio_voiceClips($userId, $portfolio['voiceClips']);
+			}
+			
+			if (array_key_exists('credits', $portfolio)){
+			    $this->save_portfolio_credits($userId, $portfolio['credits']);
 			}
 			
 			return;
 		}
 		
-		public function delete_portfolio($id)
+		public function delete_portfolio($portfolio, $userId)
 		{
-			//first delete any associated images or videos
-			$this->delete_portfolio_videos($id);
-			$this->delete_portfolio_images($id);
+		    if (empty($portfolio))
+		    {
+		        //delete all artifacts associated with user
+		        $this->delete_portfolio_images($userId, NULL);
+		        $this->delete_portfolio_videos($userId, NULL);
+		        $this->delete_portfolio_categories($userId, NULL);
+		        $this->delete_portfolio_voiceClips($userId, NULL);
+		        $this->delete_portfolio_credits($userId, NULL);
+		    }
+		    else {
+		        if (array_key_exists('images', $portfolio)){
+		            $this->delete_portfolio_images($userId, $portfolio['images']);
+		        }
+		        	
+		        if (array_key_exists('videos', $portfolio)){
+		            $this->delete_portfolio_videos($userId, $portfolio['videos']);
+		        }
+		        	
+		        if (array_key_exists('categories', $portfolio)){
+		            $this->delete_portfolio_categories($userId, $portfolio['categories']);
+		        }
+		        
+		        if (array_key_exists('voiceClips', $portfolio)){
+		            $this->delete_portfolio_voiceClips($userId, $portfolio['voiceClips']);
+		        }
+		        
+		        if (array_key_exists('credits', $portfolio)){
+		            $this->delete_portfolio_credits($userId, $portfolio['credits']);
+		        }
+		    }
 			
-			$result = $this->db->delete(PORTFOLIOS_TABLE, array('id' => $id));
-			
-			if($result === FALSE)
-	        {
-				throw new NSH_Exception(100, 'failed to delete portfolio');
-	        }
 		}
 		
 		public function validatePortfolioPostData($post_data, $userId, $isUpdate = FALSE)
 		{
-			if (!array_key_exists('categoryId', $post_data) || empty($post_data['categoryId']))
+			if (array_key_exists('images', $post_data))
 			{
-				$error_message = 'The Category Id is required';
-				throw new NSH_ValidationException(110, $error_message);
+			    //validate image collection
+			    if (!empty($post_data['images'])) {
+			        foreach ($post_data['images'] as $category) {
+			            if (!array_key_exists('imageUrl', $category) || empty($category['imageUrl'])) {
+			                $error_message = 'image imageUrl is required';
+			                throw new NSH_ValidationException(110, $error_message);
+			            }
+			            
+			            if (array_key_exists('imagePortfolioId', $category)) {
+			                //ensure the portfolioId exists
+			                if (empty($this->db->get_where(USERS_IMAGES_PORTFOLIO_TABLE, array('id' => $value['imagePortfolioId']))->result_array())){
+			                    throw new NSH_ResourceNotFoundException(220, "imagePortfolioId not found");
+			                }
+			            }
+			        }
+			        
+			    }
+			    
+			    //validate video collection
+			    if (!empty($post_data['videos'])) {
+			        foreach ($post_data['videos'] as $category) {
+			            if (!array_key_exists('videoUrl', $category) || empty($category['videoUrl'])) {
+			                $error_message = 'video videoUrl field is required';
+			                throw new NSH_ValidationException(110, $error_message);
+			            }
+			             
+			            if (array_key_exists('videoPortfolioId', $category)) {
+			                //ensure the portfolioId exists
+			                if (empty($this->db->get_where(USERS_VIDEOS_PORTFOLIO_TABLE, array('id' => $value['videoPortfolioId']))->result_array())){
+			                    throw new NSH_ResourceNotFoundException(220, "videoPortfolioId not found");
+			                }
+			            }
+			        }
+			         
+			    }
+			    
+			    //validate voiceClip collection
+			    if (!empty($post_data['voiceClips'])) {
+			        foreach ($post_data['voiceClips'] as $category) {
+			            if (!array_key_exists('clipUrl', $category) || empty($category['clipUrl'])) {
+			                $error_message = 'voiceClip clipUrl field is required';
+			                throw new NSH_ValidationException(110, $error_message);
+			            }
+			            
+			            if (!array_key_exists('caption', $category) || empty($category['caption'])) {
+			                $error_message = 'voiceClip caption field is required';
+			                throw new NSH_ValidationException(110, $error_message);
+			            }
+			    
+			            if (array_key_exists('voiceClipPortfolioId', $category)) {
+			                //ensure the portfolioId exists
+			                if (empty($this->db->get_where(USERS_VOICECLIPS_PORTFOLIO_TABLE, array('id' => $value['voiceClipPortfolioId']))->result_array())){
+			                    throw new NSH_ResourceNotFoundException(220, "voiceClipPortfolioId not found");
+			                }
+			            }
+			        }
+			    
+			    }
+			    
+			    //validate credits collection
+			    if (!empty($post_data['credits'])) {
+			        foreach ($post_data['credits'] as $category) {
+			            if (!array_key_exists('year', $category) || empty($category['year'])) {
+			                $error_message = 'credits year field is required';
+			                throw new NSH_ValidationException(110, $error_message);
+			            }
+			             
+			            if (!array_key_exists('caption', $category) || empty($category['caption'])) {
+			                $error_message = 'credits caption field is required';
+			                throw new NSH_ValidationException(110, $error_message);
+			            }
+			            
+			            if (!array_key_exists('creditTypeId', $category) || empty($category['creditTypeId'])) {
+			                $error_message = 'credits creditTypeId field is required';
+			                throw new NSH_ValidationException(110, $error_message);
+			            }
+			             
+			            if (array_key_exists('creditPortfolioId', $category)) {
+			                //ensure the portfolioId exists
+			                if (empty($this->db->get_where(USERS_CREDITS_PORTFOLIO_TABLE, array('id' => $value['creditPortfolioId']))->result_array())){
+			                    throw new NSH_ResourceNotFoundException(220, "creditPortfolioId not found");
+			                }
+			            }
+			        }
+			         
+			    }
+			    
+			    //validate categoryIds collection
+			    if (!empty($post_data['categories'])) {
+			        foreach ($post_data['categories'] as $categoryId) {
+			            if (empty($this->db->get_where(CATEGORIES_TABLE, array('id' => $categoryId))->result_array())){
+			                throw new NSH_ResourceNotFoundException(220, "categoryId '".$categoryId."' not found");
+			            }
+			        }
+			    
+			    }
+				
 			}
 			
 			if ($isUpdate)
@@ -193,87 +294,151 @@ class Portfolios_model extends CI_Model {
 			}
 		}		
 		
-		private function save_portfolio_images($portfolioId, $post_data){
-			//if images collection is empty, then delete all images associated with this portfolio
-			if (empty($post_data['images']))
-			{
-				$this->delete_portfolio_images($id);
-				return;
-			}
+		private function save_portfolio_images($userId, $image_collection){
 			
-			$portfolioImagesInRequest = array();
-			for ($i=0, $size = count($post_data['images']); $i < $size; $i++) { 
-				$portfolioImagesInRequest[$i] = strtolower($post_data['images'][$i]['imageUrl']);
-			}
-
-			$existingPortfolioImages = $this->db->get_where(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $portfolioId))->result_array();
-			$existImageUrls = array();
-			
-			//delete existing portfolio images that are not in the request
-			foreach ($existingPortfolioImages as $key => $value) {
-				$existImageUrls[$key] = $value['imageUrl'];
-				if (!in_array(strtolower($value['imageUrl']), $portfolioImagesInRequest)){
-					$this->delete_portfolio_images($portfolioId, $value['imageUrl']);
-				}
-			}
-			
-			//insert new portfolio images only
 			foreach ($portfolioImagesInRequest as $value) {
-				if (!in_array($value, $existImageUrls)){
-					$data = array('portfolioId' => $portfolioId, 'imageUrl' => $value);
-					$this->db->insert(PORTFOLIOS_IMAGES_LINK_TABLE, $data);
+			    $data = array(
+			            'imageUrl' => $value['imageUrl']);
+			    
+			    if (array_key_exists('caption', $value)) {
+			        $data['caption'] = $value['caption'];
+			    }
+				if (array_key_exists('imagePortfolioId', $value)){
+				    $this->db->update(USERS_IMAGES_PORTFOLIO_TABLE, $data, array('id' => $value['imagePortfolioId']));
+				} else {
+				    $data['userId'] = $userId;
+				    $this->db->insert(USERS_IMAGES_PORTFOLIO_TABLE, $data);
 				}
 			}			
 		}
 		
-		private function save_portfolio_videos($portfolioId, $post_data){
-			//if videos collection is empty, then delete all videos associated with this portfolio
-			if (empty($post_data['videos']))
-			{
-				$this->delete_portfolio_videos($id);
-				return;
-			}
-			$portfolioVideosInRequest = array();
-			for ($i=0, $size = count($post_data['videos']); $i < $size; $i++) { 
-				$portfolioVideosInRequest[$i] = strtolower($post_data['videos'][$i]['videoUrl']);
-			}
-
-			$existingPortfolioVideos = $this->db->get_where(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $portfolioId))->result_array();
-			$existVideoUrls = array();
+		private function save_portfolio_videos($userId, $video_collection){
 			
-			//delete existing portfolio videos that are not in the request
-			foreach ($existingPortfolioVideos as $key => $value) {
-				$existVideoUrls[$key] = $value['videoUrl'];
-				if (!in_array(strtolower($value['videoUrl']), $portfolioVideosInRequest)){
-					$this->delete_portfolio_videos($portfolioId, $value['videoUrl']);
+			foreach ($video_collection as $value) {
+			    $data = array(
+			            'videoUrl' => $value['videoUrl']
+			    );
+			    if (array_key_exists('caption', $value)) {
+			        $data['caption'] = $value['caption'];
+			    }
+				if (array_key_exists('videoPortfolioId', $value)){
+					$this->db->update(USERS_VIDEOS_PORTFOLIO_TABLE, $data, array('id' => $value['videoPortfolioId']));
+				} else {
+				    $data['userId'] = $userId;
+				    $this->db->insert(USERS_VIDEOS_PORTFOLIO_TABLE, $data);
 				}
+			}			
+		}
+		
+		private function save_portfolio_voiceClips($userId, $voiceClip_collection){
+		    
+		    foreach ($voiceClip_collection as $value) {
+		        $data = array(
+		                'clipUrl' => $value['clipUrl'],
+		                'caption' => $value['caption']);
+		        if (array_key_exists('voiceClipPortfolioId', $value)){
+		            $this->db->update(USERS_VOICECLIPS_PORTFOLIO_TABLE, $data, array('id' => $value['voiceClipPortfolioId']));
+		        } else {
+		            $data['userId'] = $userId;
+		            $this->db->insert(USERS_VOICECLIPS_PORTFOLIO_TABLE, $data);
+		        }
+		    }
+		}
+		
+		private function save_portfolio_credits($userId, $credit_collection){
+		     
+		    foreach ($credit_collection as $value) {
+		        
+		        $data = array(
+		                'creditTypeId' => $value['creditTypeId'],
+		                'year' => $value['year'],
+		                'caption' => $value['caption']);
+		        
+		        //if this is an update ensure the portfolio Id exists
+		        if (array_key_exists('creditPortfolioId', $value)) {
+		            $this->db->update(USERS_CREDITS_PORTFOLIO_TABLE, $data, array('id' => $value['creditPortfolioId']));
+		        } else {
+		            $data['userId'] = $userId;
+		            $this->db->insert(USERS_CREDITS_PORTFOLIO_TABLE, $data);
+		        }
+		    }
+		}
+		
+		private function save_portfolio_categories($userId, $categoryIds_array){
+		
+		    $existingPortfolioCategories = $this->db->get_where(USERS_CATEGORIES_PORTFOLIO_TABLE, array('userId' => $userId))->result_array();
+		    $existingCategoryIds = array();
+		     
+		    foreach ($existingPortfolioCategories as $key => $value) {
+		        $existingCategoryIds[$key] = $value['categoryId'];
+		    }
+		     
+		    //insert new portfolio categoryIds only
+		    foreach ($categoryIds_array as $value) {
+		        if (!in_array($value, $existingCategoryIds)){
+		            $data = array('userId' => $userId, 'categoryId' => $value);
+		            $this->db->insert(USERS_CATEGORIES_PORTFOLIO_TABLE, $data);
+		        }
+		    }
+		}
+		
+		private function delete_portfolio_images($userId, $imagePortfolioIds = NULL)
+		{
+			if ($imagePortfolioIds == NULL){
+			     $this->db->delete(USERS_IMAGES_PORTFOLIO_TABLE, array('userId' => $userId));
+			} else {
+			    
+			    foreach ($imagePortfolioIds as $value) {
+			        $this->db->delete(USERS_IMAGES_PORTFOLIO_TABLE, array('userid' => $userId, 'id' => $value));
+			    }
+				
 			}
-			
-			//insert new portfolio videos only
-			foreach ($portfolioVideosInRequest as $value) {
-				if (!in_array($value, $existVideoUrls)){
-					$data = array('portfolioId' => $portfolioId, 'videoUrl' => $value);
-					$this->db->insert(PORTFOLIOS_VIDEOS_LINK_TABLE, $data);
-				}
-			}			
 		}
 		
-		private function delete_portfolio_images($portfolioId, $imageUrl = NULL)
+		private function delete_portfolio_videos($userId, $videoPortfolioIds = NULL)
 		{
-			if ($imageUrl == NULL){
-				$result = $this->db->delete(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $portfolioId));
+			if ($videoPortfolioIds == NULL){
+				$this->db->delete(USERS_VIDEOS_PORTFOLIO_TABLE, array('userId' => $userId));
 			} else {
-				$result = $this->db->delete(PORTFOLIOS_IMAGES_LINK_TABLE, array('portfolioId' => $portfolioId, 'imageUrl' => $imageUrl));
+			    foreach ($videoPortfolioIds as $value) {
+			        $this->db->delete(USERS_VIDEOS_PORTFOLIO_TABLE, array('userId' => $userId, 'id' => $value));
+			    }
 			}			
+		}	
+		
+		private function delete_portfolio_voiceClips($userId, $clipPortfolioIds_array = NULL)
+		{
+		    if ($clipPortfolioIds_array == NULL){
+		        $this->db->delete(USERS_VOICECLIPS_PORTFOLIO_TABLE, array('userId' => $userId));
+		    } else {
+		        foreach ($clipPortfolioIds_array as $value) {
+		            $this->db->delete(USERS_VOICECLIPS_PORTFOLIO_TABLE, array('userId' => $userId, 'id' => $value));
+		        }
+		    }
 		}
 		
-		private function delete_portfolio_videos($portfolioId, $videoUrl = NULL)
+		private function delete_portfolio_credits($userId, $creditsPortfolioIds = NULL)
 		{
-			if ($videoUrl == NULL){
-				$result = $this->db->delete(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $portfolioId));
-			} else {
-				$result = $this->db->delete(PORTFOLIOS_VIDEOS_LINK_TABLE, array('portfolioId' => $portfolioId, 'videoUrl' => $videoUrl));
-			}			
-		}		
+		    if ($creditsPortfolioIds == NULL){
+		        $this->db->delete(USERS_CREDITS_PORTFOLIO_TABLE, array('userId' => $userId));
+		    } else {
+		         
+		        foreach ($creditsPortfolioIds as $value) {
+		            $this->db->delete(USERS_CREDITS_PORTFOLIO_TABLE, array('userid' => $userId, 'id' => $value));
+		        }
+		
+		    }
+		}
+		
+		private function delete_portfolio_voiceClips($userId, $categoryIds_array = NULL)
+		{
+		    if ($categoryIds_array == NULL){
+		        $this->db->delete(USERS_CATEGORIES_PORTFOLIO_TABLE, array('userId' => $userId));
+		    } else {
+		        foreach ($categoryIds_array as $value) {
+		            $this->db->delete(USERS_CATEGORIES_PORTFOLIO_TABLE, array('userId' => $userId, 'categoryId' => $value));
+		        }
+		    }
+		}
 		
 }

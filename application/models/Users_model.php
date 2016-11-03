@@ -273,7 +273,7 @@ class Users_model extends CI_Model {
 			return $userPortfolios;
 		}
 		
-		public function create_userPortfolio($post_data)
+		public function upsert_userPortfolio($post_data)
 		{
 			if (!array_key_exists('id', $post_data) || empty($post_data['id']))
 			{
@@ -296,38 +296,9 @@ class Users_model extends CI_Model {
 			$userId = $post_data['id'];
 			$portfolio = $post_data['portfolio'];
 		
-			$this->Portfolios_model->validatePortfolioPostData($portfolio, $userId);
-			
 			$this->Portfolios_model->upsert_portfolio($portfolio, $userId);
 		}
 		
-		public function update_userPortfolio($post_data)
-		{
-			if (!array_key_exists('id', $post_data) || empty($post_data['id']))
-			{
-				$error_message = 'The User Id is required';
-				throw new NSH_ValidationException(110, $error_message);
-			}
-			
-			//ensure that the user exists
-			if(!$this->userExists($post_data['id'])){
-				$error_message = "User does not exist";
-				throw new NSH_ResourceNotFoundException(220, $error_message);
-			}
-			
-			if (!array_key_exists('portfolio', $post_data) || empty($post_data['portfolio']))
-			{
-				$error_message = 'The Portfolio object is required';
-				throw new NSH_ValidationException(110, $error_message);
-			}
-			
-			$userId = $post_data['id'];
-			$portfolio = $post_data['portfolio'];
-		
-			$this->Portfolios_model->validatePortfolioPostData($portfolio, $userId, TRUE);
-				
-			$this->Portfolios_model->upsert_portfolio($portfolio, $userId);
-		}
 		
 		public function delete_userPortfolio($delete_data)
 		{
@@ -343,13 +314,15 @@ class Users_model extends CI_Model {
 				throw new NSH_ResourceNotFoundException(220, $error_message);
 			}
 			
-			if (!array_key_exists('portfolioId', $delete_data) || empty($delete_data['portfolioId']))
+			if (!array_key_exists('portfolio', $post_data))
 			{
-				$error_message = 'The Portfolio Id is required';
-				throw new NSH_ValidationException(110, $error_message);
+			    $post_data['portfolio'] = '';
 			}
 			
-			$this->Portfolios_model->delete_portfolio($delete_data['portfolioId']);
+			$userId = $post_data['id'];
+			$portfolio = $post_data['portfolio'];
+			
+			$this->Portfolios_model->delete_portfolio($userId, $portfolio);
 		}
 		
 		private function upsert_user($post_data)

@@ -152,18 +152,18 @@ class Portfolios_model extends CI_Model {
         if (array_key_exists('images', $post_data)) {
             // validate image collection
             if (! empty($post_data ['images'])) {
-                foreach ($post_data ['images'] as $category) {
-                    if (! array_key_exists('imageUrl', $category) || empty($category ['imageUrl'])) {
+                foreach ($post_data ['images'] as $image) {
+                    if (! array_key_exists('imageUrl', $image) || empty($image ['imageUrl'])) {
                         $error_message = 'image imageUrl is required';
                         throw new NSH_ValidationException(110, $error_message);
                     }
                     
-                    if (array_key_exists('imagePortfolioId', $category)) {
+                    if (array_key_exists('imagePortfolioId', $image)) {
                         // ensure the portfolioId exists
                         if (empty($this->db->get_where(USERS_IMAGES_PORTFOLIO_TABLE, array (
-                                'id' => $value ['imagePortfolioId']
+                                'id' => $image ['imagePortfolioId']
                         ))->result_array())) {
-                            throw new NSH_ResourceNotFoundException(220, "imagePortfolioId not found");
+                            throw new NSH_ResourceNotFoundException(220, "imagePortfolioId '".$image ['imagePortfolioId']."' not found");
                         }
                     }
                 }
@@ -172,18 +172,18 @@ class Portfolios_model extends CI_Model {
         
         // validate video collection
         if (! empty($post_data ['videos'])) {
-            foreach ($post_data ['videos'] as $category) {
-                if (! array_key_exists('videoUrl', $category) || empty($category ['videoUrl'])) {
+            foreach ($post_data ['videos'] as $video) {
+                if (! array_key_exists('videoUrl', $video) || empty($video ['videoUrl'])) {
                     $error_message = 'video videoUrl field is required';
                     throw new NSH_ValidationException(110, $error_message);
                 }
                 
-                if (array_key_exists('videoPortfolioId', $category)) {
+                if (array_key_exists('videoPortfolioId', $video)) {
                     // ensure the portfolioId exists
                     if (empty($this->db->get_where(USERS_VIDEOS_PORTFOLIO_TABLE, array (
-                            'id' => $value ['videoPortfolioId']
-                    ))->result_array())) {
-                        throw new NSH_ResourceNotFoundException(220, "videoPortfolioId not found");
+                            'id' => $video ['videoPortfolioId']
+                    ))->row_array())) {
+                        throw new NSH_ResourceNotFoundException(220, "videoPortfolioId '".$video ['videoPortfolioId']."' not found");
                     }
                 }
             }
@@ -191,23 +191,23 @@ class Portfolios_model extends CI_Model {
         
         // validate voiceClip collection
         if (! empty($post_data ['voiceClips'])) {
-            foreach ($post_data ['voiceClips'] as $category) {
-                if (! array_key_exists('clipUrl', $category) || empty($category ['clipUrl'])) {
+            foreach ($post_data ['voiceClips'] as $voiceClip) {
+                if (! array_key_exists('clipUrl', $voiceClip) || empty($voiceClip ['clipUrl'])) {
                     $error_message = 'voiceClip clipUrl field is required';
                     throw new NSH_ValidationException(110, $error_message);
                 }
                 
-                if (! array_key_exists('caption', $category) || empty($category ['caption'])) {
+                if (! array_key_exists('caption', $voiceClip) || empty($voiceClip ['caption'])) {
                     $error_message = 'voiceClip caption field is required';
                     throw new NSH_ValidationException(110, $error_message);
                 }
                 
-                if (array_key_exists('voiceClipPortfolioId', $category)) {
+                if (array_key_exists('voiceClipPortfolioId', $voiceClip)) {
                     // ensure the portfolioId exists
                     if (empty($this->db->get_where(USERS_VOICECLIPS_PORTFOLIO_TABLE, array (
-                            'id' => $value ['voiceClipPortfolioId']
-                    ))->result_array())) {
-                        throw new NSH_ResourceNotFoundException(220, "voiceClipPortfolioId not found");
+                            'id' => $voiceClip ['voiceClipPortfolioId']
+                    ))->row_array())) {
+                        throw new NSH_ResourceNotFoundException(220, "voiceClipPortfolioId '".$voiceClip ['voiceClipPortfolioId']."' not found");
                     }
                 }
             }
@@ -232,18 +232,18 @@ class Portfolios_model extends CI_Model {
                 } else {
                     //ensure the creditTypeId is valid
                     if (empty($this->db->get_where(CREDITTYPES_TABLE, array (
-                            'id' => $value ['creditTypeId']
+                            'id' => $credit ['creditTypeId']
                     ))->row_array())) {
-                        throw new NSH_ResourceNotFoundException(220, "creditTypeId not found");
+                        throw new NSH_ResourceNotFoundException(220, "creditTypeId '".$credit['creditTypeId']."' not found");
                     }
                 }
                 
                 if (array_key_exists('creditPortfolioId', $credit)) {
                     // ensure the portfolioId exists
                     if (empty($this->db->get_where(USERS_CREDITS_PORTFOLIO_TABLE, array (
-                            'id' => $value ['creditPortfolioId']
+                            'id' => $credit ['creditPortfolioId']
                     ))->row_array())) {
-                        throw new NSH_ResourceNotFoundException(220, "creditPortfolioId not found");
+                        throw new NSH_ResourceNotFoundException(220, "creditPortfolioId '".$credit['creditPortfolioId']."' not found");
                     }
                 }
             }

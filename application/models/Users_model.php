@@ -251,22 +251,12 @@ class Users_model extends CI_Model {
 				throw new NSH_ValidationException(110, $error_message);
 			}
 			
-			$data = array('userId' => $get_data['id']);
+			$userId =  $get_data['id'];
 			
-			if (array_key_exists('portfolioId', $get_data))
-			{
-				$data['id'] = $get_data['portfolioId'];
-			}
-			
-			if (array_key_exists('categoryId', $get_data))
-			{
-				$data['categoryId'] = $get_data['categoryId'];
-			}
-			
-			$portfolios = $this->Portfolios_model->get_portfolios_by_userId($data);
+			$portfolios = $this->Portfolios_model->get_portfolios_by_userId($userId);
 			
 			$userPortfolios = array(
-					'id' => $get_data['id'],
+					'id' => $userId,
 					'portfolios' => $portfolios
 			);
 			

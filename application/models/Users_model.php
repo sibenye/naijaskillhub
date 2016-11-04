@@ -279,9 +279,9 @@ class Users_model extends CI_Model {
         }
         
         $userId = $delete_data ['id'];
-        $portfolio = $delete_data ['portfolios'];
+        $portfolios = $delete_data ['portfolios'];
         
-        $this->Portfolios_model->delete_portfolio($userId, $portfolio);
+        $this->Portfolios_model->delete_portfolio($portfolios, $userId);
     }
     private function upsert_user($post_data) {
         $userId = null;

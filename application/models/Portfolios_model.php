@@ -114,8 +114,8 @@ class Portfolios_model extends CI_Model {
         
         return;
     }
-    public function delete_portfolio($portfolio, $userId) {
-        if (empty($portfolio)) {
+    public function delete_portfolio($portfolios, $userId) {
+        if (empty($portfolios)) {
             // delete all artifacts associated with user
             $this->delete_portfolio_images($userId, NULL);
             $this->delete_portfolio_videos($userId, NULL);
@@ -123,24 +123,24 @@ class Portfolios_model extends CI_Model {
             $this->delete_portfolio_voiceClips($userId, NULL);
             $this->delete_portfolio_credits($userId, NULL);
         } else {
-            if (array_key_exists('images', $portfolio)) {
-                $this->delete_portfolio_images($userId, $portfolio ['images']);
+            if (array_key_exists('images', $portfolios)) {
+                $this->delete_portfolio_images($userId, $portfolios ['images']);
             }
             
-            if (array_key_exists('videos', $portfolio)) {
-                $this->delete_portfolio_videos($userId, $portfolio ['videos']);
+            if (array_key_exists('videos', $portfolios)) {
+                $this->delete_portfolio_videos($userId, $portfolios ['videos']);
             }
             
-            if (array_key_exists('categories', $portfolio)) {
-                $this->delete_portfolio_categories($userId, $portfolio ['categories']);
+            if (array_key_exists('categories', $portfolios)) {
+                $this->delete_portfolio_categories($userId, $portfolios ['categories']);
             }
             
-            if (array_key_exists('voiceClips', $portfolio)) {
-                $this->delete_portfolio_voiceClips($userId, $portfolio ['voiceClips']);
+            if (array_key_exists('voiceClips', $portfolios)) {
+                $this->delete_portfolio_voiceClips($userId, $portfolios ['voiceClips']);
             }
             
-            if (array_key_exists('credits', $portfolio)) {
-                $this->delete_portfolio_credits($userId, $portfolio ['credits']);
+            if (array_key_exists('credits', $portfolios)) {
+                $this->delete_portfolio_credits($userId, $portfolios ['credits']);
             }
         }
     }

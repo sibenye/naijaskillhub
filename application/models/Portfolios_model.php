@@ -233,7 +233,7 @@ class Portfolios_model extends CI_Model {
                     //ensure the creditTypeId is valid
                     if (empty($this->db->get_where(CREDITTYPES_TABLE, array (
                             'id' => $value ['creditTypeId']
-                    ))->result_array())) {
+                    ))->row_array())) {
                         throw new NSH_ResourceNotFoundException(220, "creditTypeId not found");
                     }
                 }
@@ -242,7 +242,7 @@ class Portfolios_model extends CI_Model {
                     // ensure the portfolioId exists
                     if (empty($this->db->get_where(USERS_CREDITS_PORTFOLIO_TABLE, array (
                             'id' => $value ['creditPortfolioId']
-                    ))->result_array())) {
+                    ))->row_array())) {
                         throw new NSH_ResourceNotFoundException(220, "creditPortfolioId not found");
                     }
                 }

@@ -592,20 +592,20 @@ class Users extends NSH_Controller {
 	 * @apiGroup Users
 	 *
 	 * @apiParam {Number} id User's unique ID.
-	 * @apiParam {Number} [portfolio/categories/]  Array of Category IDs.
-	 * @apiParam {String} [portfolio/videos/videoPortfolioId]  Video Portfolio ID. Required if updating.
-	 * @apiParam {String} [portfolio/videos/videoUrl]  Video URL. Required if videos collection exists
-	 * @apiParam {String} [portfolio/videos/caption]  Video Caption. This is optional.
-	 * @apiParam {String} [portfolio/images/imagePortfolioId]  Image Portfolio ID. Required if updating.
-	 * @apiParam {String} [portfolio/images/imageUrl]  Video URL. Required if images collection exists
-	 * @apiParam {String} [portfolio/images/caption]  Image Caption. This is optional.
-	 * @apiParam {String} [portfolio/voiceClips/voiceClipPortfolioId]  VoiceClip Portfolio ID. Required if updating.
-	 * @apiParam {String} [portfolio/voiceClips/clipUrl]  Clip URL. Required if voiceClips collection exists
-	 * @apiParam {String} [portfolio/voiceClips/caption]  Clip Caption. Required if voiceClips collection exists.
-	 * @apiParam {String} [portfolio/credits/creditPortfolioId]  Credit Portfolio ID. Required if updating.
-	 * @apiParam {String} [portfolio/credits/creditTypeId]  CreditType ID URL. Required if credits collection exists
-	 * @apiParam {String} [portfolio/credits/caption]  Credit Caption. Required if credits collection exists.
-	 * @apiParam {String} [portfolio/credits/year]  Credit Year. Required if credits collection exists.
+	 * @apiParam {Number} [portfolios/categories/]  Array of Category IDs.
+	 * @apiParam {String} [portfolios/videos/videoPortfolioId]  Video Portfolio ID. Required if updating.
+	 * @apiParam {String} [portfolios/videos/videoUrl]  Video URL. Required if videos collection exists
+	 * @apiParam {String} [portfolios/videos/caption]  Video Caption. This is optional.
+	 * @apiParam {String} [portfolios/images/imagePortfolioId]  Image Portfolio ID. Required if updating.
+	 * @apiParam {String} [portfolios/images/imageUrl]  Video URL. Required if images collection exists
+	 * @apiParam {String} [portfolios/images/caption]  Image Caption. This is optional.
+	 * @apiParam {String} [portfolios/voiceClips/voiceClipPortfolioId]  VoiceClip Portfolio ID. Required if updating.
+	 * @apiParam {String} [portfolios/voiceClips/clipUrl]  Clip URL. Required if voiceClips collection exists
+	 * @apiParam {String} [portfolios/voiceClips/caption]  Clip Caption. Required if voiceClips collection exists.
+	 * @apiParam {String} [portfolios/credits/creditPortfolioId]  Credit Portfolio ID. Required if updating.
+	 * @apiParam {String} [portfolios/credits/creditTypeId]  CreditType ID URL. Required if credits collection exists
+	 * @apiParam {String} [portfolios/credits/caption]  Credit Caption. Required if credits collection exists.
+	 * @apiParam {String} [portfolios/credits/year]  Credit Year. Required if credits collection exists.
 	 *
 	 * @apiSuccessExample Success-Response:
 	 * HTTP/1.1 200 OK

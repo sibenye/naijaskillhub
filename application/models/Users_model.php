@@ -252,13 +252,13 @@ class Users_model extends CI_Model {
             throw new NSH_ResourceNotFoundException(220, $error_message);
         }
         
-        if (! array_key_exists('portfolio', $post_data) || empty($post_data ['portfolio'])) {
-            $error_message = 'The Portfolio object is required';
+        if (! array_key_exists('portfolios', $post_data) || empty($post_data ['portfolios'])) {
+            $error_message = 'The Portfolios object is required';
             throw new NSH_ValidationException(110, $error_message);
         }
         
         $userId = $post_data ['id'];
-        $portfolio = $post_data ['portfolio'];
+        $portfolio = $post_data ['portfolios'];
         
         $this->Portfolios_model->upsert_portfolio($portfolio, $userId);
     }

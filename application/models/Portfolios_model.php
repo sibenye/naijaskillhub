@@ -261,7 +261,7 @@ class Portfolios_model extends CI_Model {
         }
     }
     private function save_portfolio_images($userId, $image_collection) {
-        foreach ($portfolioImagesInRequest as $value) {
+        foreach ($image_collection as $value) {
             $data = array (
                     'imageUrl' => $value ['imageUrl']
             );

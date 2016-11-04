@@ -47,39 +47,39 @@ class Portfolios_model extends CI_Model {
         return $results;
     }
     public function get_portfolios_by_userId($userId) {
-        $results = array ();
-        $videos = array ();
-        $images = array ();
-        $credits = array ();
-        $voiceClips = array ();
-        $categories = array ();
+        $results = array();
+        $videos = array();
+        $images = array();
+        $credits = array();
+        $voiceClips = array();
+        $categories = array();
         
         $this->db->select('id AS videoPortfolioId, videoUrl, caption');
-        $videos = $this->db->get_where(USERS_VIDEOS_PORTFOLIO_TABLE, array (
+        $videos = $this->db->get_where(USERS_VIDEOS_PORTFOLIO_TABLE, array(
                 'userId' => $userId
         ))->result_array();
         
         $this->db->select('id AS imagePortfolioId, imageUrl, caption');
-        $images = $this->db->get_where(USERS_IMAGES_PORTFOLIO_TABLE, array (
+        $images = $this->db->get_where(USERS_IMAGES_PORTFOLIO_TABLE, array(
                 'userId' => $userId
         ))->result_array();
         
         $this->db->select('id AS creditPortfolioId, year, caption, creditTypeId');
-        $credits = $this->db->get_where(USERS_CREDITS_PORTFOLIO_TABLE, array (
+        $credits = $this->db->get_where(USERS_CREDITS_PORTFOLIO_TABLE, array(
                 'userId' => $userId
         ))->result_array();
         
         $this->db->select('id AS voiceClipPortfolioId, clipUrl, caption');
-        $voiceClips = $this->db->get_where(USERS_VOICECLIPS_PORTFOLIO_TABLE, array (
+        $voiceClips = $this->db->get_where(USERS_VOICECLIPS_PORTFOLIO_TABLE, array(
                 'userId' => $userId
         ))->result_array();
         
         $this->db->select('categoryId');
-        $categories = $this->db->get_where(USERS_CATEGORIES_PORTFOLIO_TABLE, array (
+        $categories = $this->db->get_where(USERS_CATEGORIES_PORTFOLIO_TABLE, array(
                 'userId' => $userId
         ))->result_array();
         
-        $categoryIdsArray = array ();
+        $categoryIdsArray = array();
         foreach ($categories as $key => $value) {
             $categoryIdsArray [$key] = $value ['categoryId'];
         }

@@ -229,6 +229,13 @@ class Portfolios_model extends CI_Model {
                 if (! array_key_exists('creditTypeId', $category) || empty($category ['creditTypeId'])) {
                     $error_message = 'credits creditTypeId field is required';
                     throw new NSH_ValidationException(110, $error_message);
+                } else {
+                    //ensure the creditTypeId is valid
+                    if (empty($this->db->get_where(CREDITTYPES_TABLE, array (
+                            'id' => $value ['creditTypeId']
+                    ))->result_array())) {
+                        throw new NSH_ResourceNotFoundException(220, "creditTypeId not found");
+                    }
                 }
                 
                 if (array_key_exists('creditPortfolioId', $category)) {

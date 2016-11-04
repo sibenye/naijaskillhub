@@ -735,7 +735,7 @@ class Users extends NSH_Controller {
 	{
 		$this->session_authorize();
 		try {
-			$delete_data = $this->delete();
+			$delete_data = $this->post();
 			if (!array_key_exists('id', $delete_data)){
 				$delete_data['id'] = $this->get('id');
 			}

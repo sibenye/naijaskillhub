@@ -74,21 +74,17 @@ class Portfolios_model extends CI_Model {
                 'userId' => $userId
         ))->result_array();
         
-        $this->db->select('categoryId');
-        $categories = $this->db->get_where(USERS_CATEGORIES_PORTFOLIO_TABLE, array(
-                'userId' => $userId
-        ))->result_array();
-        
-        $categoryIdsArray = array();
-        foreach ($categories as $key => $value) {
-            $categoryIdsArray [$key] = $value ['categoryId'];
-        }
+        $this->db->select('categoryId, name as categoryName');
+        $this->db->from(USERS_CATEGORIES_PORTFOLIO_TABLE);
+        $this->db->join(CATEGORIES_TABLE, CATEGORIES_TABLE.'.id = '.USERS_CATEGORIES_PORTFOLIO_TABLE.'.categoryId');
+        $this->db->where(array('userId' => $userId));
+        $categories = $this->db->get()->result_array();
         
         $results ['videos'] = $videos;
         $results ['images'] = $images;
         $results ['voiceClips'] = $voiceClips;
         $results ['credits'] = $credits;
-        $results ['categories'] = $categoryIdsArray;
+        $results ['categories'] = $categories;
         
         return $results;
     }

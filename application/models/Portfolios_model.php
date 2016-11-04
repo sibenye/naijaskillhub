@@ -434,7 +434,7 @@ class Portfolios_model extends CI_Model {
 		    }
 		}
 		
-		private function delete_portfolio_voiceClips($userId, $categoryIds_array = NULL)
+		private function delete_portfolio_categories($userId, $categoryIds_array = NULL)
 		{
 		    if ($categoryIds_array == NULL){
 		        $this->db->delete(USERS_CATEGORIES_PORTFOLIO_TABLE, array('userId' => $userId));

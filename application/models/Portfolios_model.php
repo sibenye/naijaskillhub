@@ -215,18 +215,18 @@ class Portfolios_model extends CI_Model {
         
         // validate credits collection
         if (! empty($post_data ['credits'])) {
-            foreach ($post_data ['credits'] as $category) {
-                if (! array_key_exists('year', $category) || empty($category ['year'])) {
+            foreach ($post_data ['credits'] as $credit) {
+                if (! array_key_exists('year', $credit) || empty($credit ['year'])) {
                     $error_message = 'credits year field is required';
                     throw new NSH_ValidationException(110, $error_message);
                 }
                 
-                if (! array_key_exists('caption', $category) || empty($category ['caption'])) {
+                if (! array_key_exists('caption', $credit) || empty($credit ['caption'])) {
                     $error_message = 'credits caption field is required';
                     throw new NSH_ValidationException(110, $error_message);
                 }
                 
-                if (! array_key_exists('creditTypeId', $category) || empty($category ['creditTypeId'])) {
+                if (! array_key_exists('creditTypeId', $credit) || empty($credit ['creditTypeId'])) {
                     $error_message = 'credits creditTypeId field is required';
                     throw new NSH_ValidationException(110, $error_message);
                 } else {
@@ -238,7 +238,7 @@ class Portfolios_model extends CI_Model {
                     }
                 }
                 
-                if (array_key_exists('creditPortfolioId', $category)) {
+                if (array_key_exists('creditPortfolioId', $credit)) {
                     // ensure the portfolioId exists
                     if (empty($this->db->get_where(USERS_CREDITS_PORTFOLIO_TABLE, array (
                             'id' => $value ['creditPortfolioId']

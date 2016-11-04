@@ -53,36 +53,40 @@ class Portfolios_model extends CI_Model {
 			return $results;        
 		}
 		
-		public function get_portfolios_by_userId($get_data)
+		public function get_portfolios_by_userId($userId)
 		{
 			$results = array();
-			$request = array('userId' => $get_data['userId']);
-			if (array_key_exists('id', $get_data))
-			{
-				$request['id'] = $get_data['id'];
+			$videos = array();
+			$images = array();
+			$credits = array();
+			$voiceClips = array();
+			$categories = array();
+			
+			$this->db->select('id AS videoPortfolioId, videoUrl, caption');
+			$videos = $this->db->get_where(USERS_VIDEOS_PORTFOLIO_TABLE, array('userId' => $userId))->result_array();
+			
+			$this->db->select('id AS imagePortfolioId, imageUrl, caption');
+			$images = $this->db->get_where(USERS_IMAGES_PORTFOLIO_TABLE, array('userId' => $userId))->result_array();
+			
+			$this->db->select('id AS creditPortfolioId, year, caption, creditTypeId');
+			$credits = $this->db->get_where(USERS_CREDITS_PORTFOLIO_TABLE, array('userId' => $userId))->result_array();
+			
+			$this->db->select('id AS voiceClipPortfolioId, clipUrl, caption');
+			$voiceClips = $this->db->get_where(USERS_VOICECLIPS_PORTFOLIO_TABLE, array('userId' => $userId))->result_array();
+			
+			$this->db->select('categoryId');
+			$categories = $this->db->get_where(USERS_CATEGORIES_PORTFOLIO_TABLE, array('userId' => $userId))->result_array();
+			
+			$categoryIdsArray = array();
+			foreach ($categories as $key => $value) {
+			    $categoryIdsArray[$key] = $value['categoryId'];
 			}
 			
-			if (array_key_exists('categoryId', $get_data))
-			{
-				$request['categoryId'] = $get_data['categoryId'];
-			}
-			
-			$query = $this->db->get_where(PORTFOLIOS_TABLE, $request);
-			$results = $query->result_array();
-			
-			if (!$results || count($results) == 0 || $results[0] == NULL){
-				$message = 'No portfolios found';
-				throw new NSH_ResourceNotFoundException(220, $message);
-			}
-				
-			foreach ($results as $key => $value) {
-				//retrieve images and videos
-				$videos = $this->db->get_where(USERS_VIDEOS_PORTFOLIO_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
-				$images = $this->db->get_where(USERS_IMAGES_PORTFOLIO_TABLE, array('portfolioId' => $results[$key]['id']))->result_array();
-		
-				$results[$key]['videos'] = $videos;
-				$results[$key]['images'] = $images;
-			}
+			$results['videos'] = $videos;
+			$results['images'] = $images;
+			$results['voiceClips'] = $voiceClips;
+			$results['credits'] = $credits;
+			$results['categories'] = $categoryIdsArray;
 		
 			return $results;
 		}

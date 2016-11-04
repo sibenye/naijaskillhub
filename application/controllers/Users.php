@@ -132,9 +132,10 @@ class Users extends NSH_Controller {
      *
      * @apiSuccess {Number} id User ID.
      * @apiSuccess {Array} portfolios/categories An array of the Portfolio categories.
-     * @apiSuccess {Array} portfolios/voiceClips  An array of the Portfolio voice clips.
-     * @apiSuccess {Array} portfolios/videos  An array of the Portfolio video urls.
-     * @apiSuccess {Array} portfolios/images  An array of the Portfolio image urls.
+     * @apiSuccess {Array} portfolios/voiceClips  An array of the Portfolio voiceClips.
+     * @apiSuccess {Array} portfolios/videos  An array of the Portfolio videos.
+     * @apiSuccess {Array} portfolios/images  An array of the Portfolio images.
+     * @apiSuccess {Array} portfolios/credits  An array of the Portfolio credits.
      * 
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
@@ -145,15 +146,28 @@ class Users extends NSH_Controller {
 	 *			"id" : "1",
 	 *			"portfolios" : {
  *					"videos" : [{
- *						"id" : "5",
+ *						"videoPortfolioId" : "5",
  *						"caption" : "video caption",
  *						"videoUrl" : "l:\\testdrive2.mp4"
  *						}
  *					],
  *					"images" : [{
- *						"id" : "4",
- *						"portfolioId" : "2",
+ *						"imagePortfolioId" : "4",
+ *						"caption" : "image caption",
  *						"imageUrl" : "c:\\secondimage.png"
+ *						}
+ *					],
+ *					"credits" : [{
+ *						"creditPortfolioId" : "7",
+ *						"caption" : "Graduated from High school",
+ *						"year" : "1996",
+ *                      "creditTypeId": "3"
+ *						}
+ *					],
+ *					"voiceClips" : [{
+ *						"voiceClipPortfolioId" : "9",
+ *						"caption" : "voiceClip caption",
+ *						"clipUrl" : "c:\\secondimage.mp3"
  *						}
  *					]
  *				}

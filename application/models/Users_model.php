@@ -274,12 +274,12 @@ class Users_model extends CI_Model {
             throw new NSH_ResourceNotFoundException(220, $error_message);
         }
         
-        if (! array_key_exists('portfolio', $post_data)) {
-            $post_data ['portfolio'] = '';
+        if (! array_key_exists('portfolios', $post_data)) {
+            $post_data ['portfolios'] = '';
         }
         
         $userId = $post_data ['id'];
-        $portfolio = $post_data ['portfolio'];
+        $portfolio = $post_data ['portfolios'];
         
         $this->Portfolios_model->delete_portfolio($userId, $portfolio);
     }

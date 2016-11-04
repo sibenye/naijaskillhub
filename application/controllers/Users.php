@@ -704,11 +704,11 @@ class Users extends NSH_Controller {
 	 * @apiGroup Users
 	 *
 	 * @apiParam {Number} id User's unique ID.
-	 * @apiParam {Number} [portfolio/categories/]  Array of Category IDs.
-	 * @apiParam {String} [portfolio/videos/]  Array of Video Portfolio IDs.
-	 * @apiParam {String} [portfolio/images/]  Array of Image Portfolio IDs.
-	 * @apiParam {String} [portfolio/voiceClips/]  Array of VoiceClip Portfolio IDs.
-	 * @apiParam {String} [portfolio/credits/]  Array of Credits Portfolio IDs.
+	 * @apiParam {Number} [portfolios/categories/]  Array of Category IDs.
+	 * @apiParam {String} [portfolios/videos/]  Array of Video Portfolio IDs.
+	 * @apiParam {String} [portfolios/images/]  Array of Image Portfolio IDs.
+	 * @apiParam {String} [portfolios/voiceClips/]  Array of VoiceClip Portfolio IDs.
+	 * @apiParam {String} [portfolios/credits/]  Array of Credits Portfolio IDs.
 	 *
 	 *
 	 * @apiSuccessExample Success-Response:

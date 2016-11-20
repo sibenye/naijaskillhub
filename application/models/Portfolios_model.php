@@ -19,9 +19,9 @@ class Portfolios_model extends CI_Model {
         $this->db->where('isActive', true);
         $usersResult = $this->db->get()->result_array();
 
-        foreach ($usersResult as $user) {
-            $results ['id'] = $user ['id'];
-            $results ['emailAddress'] = $user ['emailAddress'];
+        foreach ($usersResult as $key => $value) {
+            $results [$key] ['id'] = $value ['id'];
+            $results [$key] ['emailAddress'] = $value ['emailAddress'];
         }
 
         return $results;

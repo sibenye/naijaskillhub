@@ -20,43 +20,86 @@ class Portfolios extends NSH_Controller {
      * @apiName GetPortfolios
      * @apiGroup Portfolios
      *
-     * @apiParam {Number} [id] Portfolio ID.
-     * @apiParam {Number} [categoryId] Portfolio category ID.
+     * @apiParam {Number} [page] Page Number.
+     * @apiParam {Number} [perPage] Number of results per page.
      *
-     * @apiSuccess {Number} id Portfolio ID.
-     * @apiSuccess {Number} categoryId Portfolio category ID.
-     * @apiSuccess {Number} userId User ID.
-     * @apiSuccess {Date} createdDate Portfolio created date.
-     * @apiSuccess {Date} modifiedDate Portfolio modified date.
-     * @apiSuccess {Array} videos An array of the Portfolio video urls.
-     * @apiSuccess {Array} images An array of the Portfolio image urls.
+     * @apiSuccess {Number} id User ID.
+     * @apiSuccess {Dictionary} userAttributes  A dictionary list of the User's attributes.
+     * @apiSuccess {Array} portfolios/categories An array of the Portfolio categories.
+     * @apiSuccess {Array} portfolios/voiceClips  An array of the Portfolio voiceClips.
+     * @apiSuccess {Array} portfolios/videos  An array of the Portfolio videos.
+     * @apiSuccess {Array} portfolios/images  An array of the Portfolio images.
+     * @apiSuccess {Array} portfolios/credits  An array of the Portfolio credits.
      *
      * @apiSuccessExample Success-Response:
      * HTTP/1.1 200 OK
      * {
-     * "status" : 0,
-     * "message" : "success",
-     * "response" : [{
-     * "id" : "2",
-     * "categoryId" : "1",
-     * "userId" : "1",
-     * "createdDate" : "2015-12-27 04:37:58",
-     * "modifiedDate" : "2016-05-10 06:39:22",
-     * "videos" : [{
-     * "id" : "5",
-     * "portfolioId" : "2",
-     * "videoUrl" : "l:\\testdrive2.mp4"
-     * }
-     * ],
-     * "images" : [{
-     * "id" : "4",
-     * "portfolioId" : "2",
-     * "imageUrl" : "c:\\secondimage.png"
-     * }
-     * ]
-     * }
-     * ]
-     * }
+     *"status": 0,
+     *"message": "success",
+     *"response": [
+     *      {
+     *        "id": "27",
+     *        "emailAddress": "testsly4change@mailinator.com",
+     *        "userAttributes": null,
+     *        "portfolios": {
+     *          "videos": [
+     *            {
+     *              "videoPortfolioId": "1",
+     *              "videoUrl": "/testVideo.mp4",
+     *              "caption": "video caption"
+     *            }
+     *          ],
+     *          "images": [
+     *            {
+     *              "imagePortfolioId": "1",
+     *              "imageUrl": "/testImage.png",
+     *              "caption": "image caption"
+     *            }
+     *          ],
+     *          "voiceClips": [
+     *            {
+     *              "voiceClipPortfolioId": "1",
+     *              "clipUrl": "/testClip.mp3",
+     *              "caption": "my first voice clip"
+     *            }
+     *          ],
+     *          "credits": [
+     *            {
+     *              "creditPortfolioId": "1",
+     *              "year": "1980",
+     *              "caption": "High School Graduation",
+     *              "creditTypeId": "1"
+     *            }
+     *          ],
+     *          "categories": [
+     *            {
+     *              "categoryId": "6",
+     *              "categoryName": "Actor/Actress"
+     *            },
+     *            {
+     *              "categoryId": "7",
+     *              "categoryName": "Dancer"
+     *            }
+     *          ]
+     *        }
+     *      },
+     *      {
+     *        "id": "28",
+     *        "emailAddress": "testGSR3766@mailinator.com",
+     *        "userAttributes": {
+     *          "firstName": "test",
+     *          "lastName": "GSR37"
+     *        },
+     *        "portfolios": {
+     *          "videos": [],
+     *          "images": [],
+     *          "voiceClips": [],
+     *          "credits": [],
+     *          "categories": []
+     *        }
+     *      }
+     *  ]
+     *}
      *
      * @apiErrorExample Error-Response:
      * HTTP/1.1 404 Not Found

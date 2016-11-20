@@ -23,8 +23,9 @@ class Portfolios_model extends CI_Model {
         foreach ($usersResult as $key => $value) {
             $results [$key] ['id'] = $value ['id'];
             $results [$key] ['emailAddress'] = $value ['emailAddress'];
-            $results [$key] ['userAttributes'] = $this->UserAttributeValues_model->get_userAttributeValues(
+            $userAttributes = $this->UserAttributeValues_model->get_userAttributeValues(
                     $value ['id']);
+            $results [$key] ['userAttributes'] = $userAttributes ? $userAttributes ['attributes'] : NULL;
             $results [$key] ['portfolios'] = $this->get_portfolios_by_userId(
                     $value ['id']);
         }

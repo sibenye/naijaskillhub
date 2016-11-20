@@ -9,6 +9,7 @@ class Portfolios_model extends CI_Model {
 
     public function __construct() {
         $this->load->database();
+        $this->load->model('UserAttributeValues_model');
     }
 
     public function get_portfolios($page = 1, $perPage = 20) {

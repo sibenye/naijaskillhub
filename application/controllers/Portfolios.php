@@ -24,6 +24,7 @@ class Portfolios extends NSH_Controller {
      * @apiParam {Number} [perPage] Number of results per page.
      *
      * @apiSuccess {Number} id User ID.
+     * @apiSuccess {String} emailAddress User ID.
      * @apiSuccess {Dictionary} userAttributes  A dictionary list of the User's attributes.
      * @apiSuccess {Array} portfolios/categories An array of the Portfolio categories.
      * @apiSuccess {Array} portfolios/voiceClips  An array of the Portfolio voiceClips.

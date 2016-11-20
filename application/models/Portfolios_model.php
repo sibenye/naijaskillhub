@@ -14,7 +14,10 @@ class Portfolios_model extends CI_Model {
 
     public function get_portfolios($page = 1, $perPage = 20) {
         $results = array ();
+        $limit = $perPage;
+        $offset = $page == 1 ? 0 : ($page - 1) * $perPage;
 
+        $this->db->limit($limit, $offset);
         $this->db->select('id, emailAddress');
         $this->db->from(USERS_TABLE);
         $this->db->where('isActive', true);

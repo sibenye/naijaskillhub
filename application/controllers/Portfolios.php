@@ -70,7 +70,8 @@ class Portfolios extends NSH_Controller {
      */
     function portfolios_get() {
         try {
-            $portfolios = $this->Portfolios_model->get_portfolios();
+            $portfolios = $this->Portfolios_model->get_portfolios(
+                    $this->query('page'), $this->query('perPage'));
 
             $this->successResponse($portfolios);
         } catch ( NSH_Exception $e ) {

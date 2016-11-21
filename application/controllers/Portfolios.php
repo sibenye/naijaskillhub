@@ -20,8 +20,8 @@ class Portfolios extends NSH_Controller {
      * @apiName GetPortfolios
      * @apiGroup Portfolios
      *
-     * @apiParam {Number} [page] Page Number.
-     * @apiParam {Number} [perPage] Number of results per page.
+     * @apiParam {Number} [page] Page Number. Default is 1.
+     * @apiParam {Number} [perPage] Number of results per page. Default is 20.
      *
      * @apiSuccess {Number} id User ID.
      * @apiSuccess {String} emailAddress User EmailAddress.

@@ -33,6 +33,8 @@ class Portfolios_model extends CI_Model {
                     $value ['id']);
         }
 
+        // TODO: filter the results to return only users that have a profile image.
+
         return $results;
     }
 

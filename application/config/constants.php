@@ -103,9 +103,12 @@ define ( 'AUTH_KEY_DELIMITER', '<>');
 // Database Table Names without the 'nsh_' prefix
 define ( 'CATEGORIES_TABLE', 'categories' );
 define ( 'CREDENTIALTYPES_TABLE', 'credentialtypes' );
-define ( 'PORTFOLIOS_TABLE', 'portfolios' );
-define ( 'PORTFOLIOS_IMAGES_LINK_TABLE', 'portfolios_images_link' );
-define ( 'PORTFOLIOS_VIDEOS_LINK_TABLE', 'portfolios_videos_link' );
+define ( 'CREDITTYPES_TABLE', 'credittypes' );
+define ( 'USERS_IMAGES_PORTFOLIO_TABLE', 'users_images_portfolio' );
+define ( 'USERS_VIDEOS_PORTFOLIO_TABLE', 'users_videos_portfolio' );
+define ( 'USERS_VOICECLIPS_PORTFOLIO_TABLE', 'users_voiceclips_portfolio' );
+define ( 'USERS_CATEGORIES_PORTFOLIO_TABLE', 'users_categories_portfolio' );
+define ( 'USERS_CREDITS_PORTFOLIO_TABLE', 'users_credits_portfolio' );
 define ( 'USERATTRIBUTES_TABLE', 'userattributes' );
 define ( 'USERATTRIBUTEVALUES_TABLE', 'userattributevalues' );
 define ( 'USERSTANDARDCREDENTIALS_TABLE', 'userstandardcredentials' );
